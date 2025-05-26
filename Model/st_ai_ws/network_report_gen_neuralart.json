@@ -1,0 +1,5112 @@
+{
+    "_allocate_inputs": 0,
+    "_allocate_outputs": 0,
+    "cli_parameters": "generate --no-inputs-allocation --no-outputs-allocation --model yolov8n_256_quant_pc_uf_pose_coco-st.tflite --target stm32n6 --st-neural-art default@user_neuralart.json",
+    "cli_version": {
+        "extra": "20049",
+        "major": 2,
+        "micro": 0,
+        "minor": 0
+    },
+    "cli_version_str": "2.0.0-20049",
+    "code_size": 0,
+    "compression": [],
+    "date_time": "2025-05-02 19:19:12",
+    "error": 0,
+    "error_str": [],
+    "exec_cmd": "generate",
+    "exec_duration": 0.0,
+    "hash": "0xbba48e5c5bc472f90174aa6da94b2070",
+    "inputs": [
+        "Input_6_out_0"
+    ],
+    "layers": [
+        {
+            "c_id": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30,
+                31,
+                32,
+                33,
+                34,
+                35,
+                36,
+                37,
+                38,
+                39,
+                40,
+                41,
+                42,
+                43,
+                44,
+                45,
+                46,
+                47,
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54,
+                55,
+                56,
+                57,
+                58,
+                59,
+                60,
+                61,
+                62,
+                63,
+                64,
+                65,
+                66,
+                67,
+                68,
+                69,
+                70,
+                71,
+                72,
+                73,
+                74,
+                75,
+                76,
+                77,
+                78,
+                79,
+                80,
+                81,
+                82,
+                83,
+                84,
+                85,
+                86,
+                87,
+                88,
+                89,
+                90,
+                91,
+                92,
+                93,
+                94,
+                95,
+                96,
+                97,
+                98,
+                99,
+                100,
+                101,
+                102,
+                103,
+                104,
+                105,
+                106,
+                107,
+                108,
+                109,
+                110,
+                111,
+                112,
+                113,
+                114,
+                115,
+                116,
+                117,
+                118,
+                119,
+                120,
+                121,
+                122,
+                123,
+                124,
+                125,
+                126,
+                127,
+                128,
+                129,
+                130,
+                131,
+                132,
+                133,
+                134,
+                135,
+                136,
+                137,
+                138,
+                139,
+                140,
+                141,
+                142,
+                143,
+                144,
+                145,
+                146,
+                147,
+                148,
+                149,
+                150,
+                151,
+                152,
+                153,
+                154,
+                155,
+                156,
+                157,
+                158,
+                159,
+                160,
+                161,
+                162,
+                163,
+                164,
+                165,
+                166,
+                167,
+                168,
+                169,
+                170,
+                171,
+                172,
+                173,
+                174,
+                175,
+                176,
+                177,
+                178,
+                179,
+                180,
+                181,
+                182,
+                183,
+                184,
+                185,
+                186,
+                187,
+                188,
+                189,
+                190,
+                191,
+                192,
+                193,
+                194,
+                195,
+                196,
+                197,
+                198,
+                199,
+                200,
+                201,
+                202,
+                203,
+                204,
+                205,
+                206,
+                207,
+                208,
+                209,
+                210,
+                211,
+                212,
+                213,
+                214,
+                215,
+                216,
+                217,
+                218,
+                219,
+                220,
+                221,
+                222,
+                223,
+                224
+            ],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 8403884
+            },
+            "id": 0,
+            "inputs": [],
+            "name": "serving_default_images0",
+            "original": "",
+            "type": "Input"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 393216,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 0,
+            "inputs": [
+                "serving_default_images0"
+            ],
+            "name": "conversion_0",
+            "original": "QUANTIZE",
+            "type": "Conversion"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 1,
+            "inputs": [
+                "conversion_0"
+            ],
+            "name": "pad_1",
+            "original": "PAD",
+            "type": "Pad"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 7077904,
+                "n_params": 448,
+                "psize": 496,
+                "rom_size": 0
+            },
+            "id": 2,
+            "inputs": [
+                "pad_1"
+            ],
+            "name": "conv2d_2",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 2621440,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 3,
+            "inputs": [
+                "conv2d_2"
+            ],
+            "name": "nl_3",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 262144,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 4,
+            "inputs": [
+                "conv2d_2",
+                "nl_3"
+            ],
+            "name": "eltwise_4",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 5,
+            "inputs": [
+                "eltwise_4"
+            ],
+            "name": "pad_5",
+            "original": "PAD",
+            "type": "Pad"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 18874400,
+                "n_params": 4640,
+                "psize": 4736,
+                "rom_size": 0
+            },
+            "id": 6,
+            "inputs": [
+                "pad_5"
+            ],
+            "name": "conv2d_6",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 1310720,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 7,
+            "inputs": [
+                "conv2d_6"
+            ],
+            "name": "nl_7",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 131072,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 8,
+            "inputs": [
+                "conv2d_6",
+                "nl_7"
+            ],
+            "name": "eltwise_8",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 4194336,
+                "n_params": 1056,
+                "psize": 1152,
+                "rom_size": 0
+            },
+            "id": 9,
+            "inputs": [
+                "eltwise_8"
+            ],
+            "name": "conv2d_9",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 1310720,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 10,
+            "inputs": [
+                "conv2d_9"
+            ],
+            "name": "nl_10",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 131072,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 11,
+            "inputs": [
+                "conv2d_9",
+                "nl_10"
+            ],
+            "name": "eltwise_11",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 2,
+                "psize": 8,
+                "rom_size": 0
+            },
+            "id": 12,
+            "inputs": [
+                "eltwise_11"
+            ],
+            "name": "split_12",
+            "original": "SPLIT",
+            "type": "Split"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437200,
+                "n_params": 2320,
+                "psize": 2368,
+                "rom_size": 0
+            },
+            "id": 13,
+            "inputs": [
+                "split_12"
+            ],
+            "name": "conv2d_13",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 655360,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 14,
+            "inputs": [
+                "conv2d_13"
+            ],
+            "name": "nl_14",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 65536,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 15,
+            "inputs": [
+                "conv2d_13",
+                "nl_14"
+            ],
+            "name": "eltwise_15",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437200,
+                "n_params": 2320,
+                "psize": 2368,
+                "rom_size": 0
+            },
+            "id": 16,
+            "inputs": [
+                "eltwise_15"
+            ],
+            "name": "conv2d_16",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 655360,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 17,
+            "inputs": [
+                "conv2d_16"
+            ],
+            "name": "nl_17",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 65536,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 18,
+            "inputs": [
+                "conv2d_16",
+                "nl_17"
+            ],
+            "name": "eltwise_18",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 65536,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 19,
+            "inputs": [
+                "split_12",
+                "eltwise_18"
+            ],
+            "name": "eltwise_19",
+            "original": "ADD",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 20,
+            "inputs": [
+                "split_12",
+                "split_12",
+                "eltwise_19"
+            ],
+            "name": "concat_20",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 6291488,
+                "n_params": 1568,
+                "psize": 1664,
+                "rom_size": 0
+            },
+            "id": 21,
+            "inputs": [
+                "concat_20"
+            ],
+            "name": "conv2d_21",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 1310720,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 22,
+            "inputs": [
+                "conv2d_21"
+            ],
+            "name": "nl_22",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 131072,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 23,
+            "inputs": [
+                "conv2d_21",
+                "nl_22"
+            ],
+            "name": "eltwise_23",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 24,
+            "inputs": [
+                "eltwise_23"
+            ],
+            "name": "pad_24",
+            "original": "PAD",
+            "type": "Pad"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 18874432,
+                "n_params": 18496,
+                "psize": 18688,
+                "rom_size": 0
+            },
+            "id": 25,
+            "inputs": [
+                "pad_24"
+            ],
+            "name": "conv2d_25",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 655360,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 26,
+            "inputs": [
+                "conv2d_25"
+            ],
+            "name": "nl_26",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 65536,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 27,
+            "inputs": [
+                "conv2d_25",
+                "nl_26"
+            ],
+            "name": "eltwise_27",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 4194368,
+                "n_params": 4160,
+                "psize": 4352,
+                "rom_size": 0
+            },
+            "id": 28,
+            "inputs": [
+                "eltwise_27"
+            ],
+            "name": "conv2d_28",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 655360,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 29,
+            "inputs": [
+                "conv2d_28"
+            ],
+            "name": "nl_29",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 65536,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 30,
+            "inputs": [
+                "conv2d_28",
+                "nl_29"
+            ],
+            "name": "eltwise_30",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 2,
+                "psize": 8,
+                "rom_size": 0
+            },
+            "id": 31,
+            "inputs": [
+                "eltwise_30"
+            ],
+            "name": "split_31",
+            "original": "SPLIT",
+            "type": "Split"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437216,
+                "n_params": 9248,
+                "psize": 9344,
+                "rom_size": 0
+            },
+            "id": 32,
+            "inputs": [
+                "split_31"
+            ],
+            "name": "conv2d_32",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 327680,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 33,
+            "inputs": [
+                "conv2d_32"
+            ],
+            "name": "nl_33",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32768,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 34,
+            "inputs": [
+                "conv2d_32",
+                "nl_33"
+            ],
+            "name": "eltwise_34",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437216,
+                "n_params": 9248,
+                "psize": 9344,
+                "rom_size": 0
+            },
+            "id": 35,
+            "inputs": [
+                "eltwise_34"
+            ],
+            "name": "conv2d_35",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 327680,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 36,
+            "inputs": [
+                "conv2d_35"
+            ],
+            "name": "nl_36",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32768,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 37,
+            "inputs": [
+                "conv2d_35",
+                "nl_36"
+            ],
+            "name": "eltwise_37",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32768,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 38,
+            "inputs": [
+                "split_31",
+                "eltwise_37"
+            ],
+            "name": "eltwise_38",
+            "original": "ADD",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437216,
+                "n_params": 9248,
+                "psize": 9344,
+                "rom_size": 0
+            },
+            "id": 39,
+            "inputs": [
+                "eltwise_38"
+            ],
+            "name": "conv2d_39",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 327680,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 40,
+            "inputs": [
+                "conv2d_39"
+            ],
+            "name": "nl_40",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32768,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 41,
+            "inputs": [
+                "conv2d_39",
+                "nl_40"
+            ],
+            "name": "eltwise_41",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437216,
+                "n_params": 9248,
+                "psize": 9344,
+                "rom_size": 0
+            },
+            "id": 42,
+            "inputs": [
+                "eltwise_41"
+            ],
+            "name": "conv2d_42",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 327680,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 43,
+            "inputs": [
+                "conv2d_42"
+            ],
+            "name": "nl_43",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32768,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 44,
+            "inputs": [
+                "conv2d_42",
+                "nl_43"
+            ],
+            "name": "eltwise_44",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32768,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 45,
+            "inputs": [
+                "eltwise_38",
+                "eltwise_44"
+            ],
+            "name": "eltwise_45",
+            "original": "ADD",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 46,
+            "inputs": [
+                "split_31",
+                "split_31",
+                "eltwise_38",
+                "eltwise_45"
+            ],
+            "name": "concat_46",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 8388672,
+                "n_params": 8256,
+                "psize": 8448,
+                "rom_size": 0
+            },
+            "id": 47,
+            "inputs": [
+                "concat_46"
+            ],
+            "name": "conv2d_47",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 655360,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 48,
+            "inputs": [
+                "conv2d_47"
+            ],
+            "name": "nl_48",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 65536,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 49,
+            "inputs": [
+                "conv2d_47",
+                "nl_48"
+            ],
+            "name": "eltwise_49",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 50,
+            "inputs": [
+                "eltwise_49"
+            ],
+            "name": "pad_50",
+            "original": "PAD",
+            "type": "Pad"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 18874496,
+                "n_params": 73856,
+                "psize": 74240,
+                "rom_size": 0
+            },
+            "id": 51,
+            "inputs": [
+                "pad_50"
+            ],
+            "name": "conv2d_51",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 327680,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 52,
+            "inputs": [
+                "conv2d_51"
+            ],
+            "name": "nl_52",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32768,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 53,
+            "inputs": [
+                "conv2d_51",
+                "nl_52"
+            ],
+            "name": "eltwise_53",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 4194432,
+                "n_params": 16512,
+                "psize": 16896,
+                "rom_size": 0
+            },
+            "id": 54,
+            "inputs": [
+                "eltwise_53"
+            ],
+            "name": "conv2d_54",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 327680,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 55,
+            "inputs": [
+                "conv2d_54"
+            ],
+            "name": "nl_55",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32768,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 56,
+            "inputs": [
+                "conv2d_54",
+                "nl_55"
+            ],
+            "name": "eltwise_56",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 2,
+                "psize": 8,
+                "rom_size": 0
+            },
+            "id": 57,
+            "inputs": [
+                "eltwise_56"
+            ],
+            "name": "split_57",
+            "original": "SPLIT",
+            "type": "Split"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437248,
+                "n_params": 36928,
+                "psize": 37120,
+                "rom_size": 0
+            },
+            "id": 58,
+            "inputs": [
+                "split_57"
+            ],
+            "name": "conv2d_58",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 59,
+            "inputs": [
+                "conv2d_58"
+            ],
+            "name": "nl_59",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 60,
+            "inputs": [
+                "conv2d_58",
+                "nl_59"
+            ],
+            "name": "eltwise_60",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437248,
+                "n_params": 36928,
+                "psize": 37120,
+                "rom_size": 0
+            },
+            "id": 61,
+            "inputs": [
+                "eltwise_60"
+            ],
+            "name": "conv2d_61",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 62,
+            "inputs": [
+                "conv2d_61"
+            ],
+            "name": "nl_62",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 63,
+            "inputs": [
+                "conv2d_61",
+                "nl_62"
+            ],
+            "name": "eltwise_63",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 64,
+            "inputs": [
+                "split_57",
+                "eltwise_63"
+            ],
+            "name": "eltwise_64",
+            "original": "ADD",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437248,
+                "n_params": 36928,
+                "psize": 37120,
+                "rom_size": 0
+            },
+            "id": 65,
+            "inputs": [
+                "eltwise_64"
+            ],
+            "name": "conv2d_65",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 66,
+            "inputs": [
+                "conv2d_65"
+            ],
+            "name": "nl_66",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 67,
+            "inputs": [
+                "conv2d_65",
+                "nl_66"
+            ],
+            "name": "eltwise_67",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437248,
+                "n_params": 36928,
+                "psize": 37120,
+                "rom_size": 0
+            },
+            "id": 68,
+            "inputs": [
+                "eltwise_67"
+            ],
+            "name": "conv2d_68",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 69,
+            "inputs": [
+                "conv2d_68"
+            ],
+            "name": "nl_69",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 70,
+            "inputs": [
+                "conv2d_68",
+                "nl_69"
+            ],
+            "name": "eltwise_70",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 71,
+            "inputs": [
+                "eltwise_64",
+                "eltwise_70"
+            ],
+            "name": "eltwise_71",
+            "original": "ADD",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 72,
+            "inputs": [
+                "split_57",
+                "split_57",
+                "eltwise_64",
+                "eltwise_71"
+            ],
+            "name": "concat_72",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 8388736,
+                "n_params": 32896,
+                "psize": 33280,
+                "rom_size": 0
+            },
+            "id": 73,
+            "inputs": [
+                "concat_72"
+            ],
+            "name": "conv2d_73",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 327680,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 74,
+            "inputs": [
+                "conv2d_73"
+            ],
+            "name": "nl_74",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32768,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 75,
+            "inputs": [
+                "conv2d_73",
+                "nl_74"
+            ],
+            "name": "eltwise_75",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 76,
+            "inputs": [
+                "eltwise_75"
+            ],
+            "name": "pad_76",
+            "original": "PAD",
+            "type": "Pad"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 18874624,
+                "n_params": 295168,
+                "psize": 295936,
+                "rom_size": 0
+            },
+            "id": 77,
+            "inputs": [
+                "pad_76"
+            ],
+            "name": "conv2d_77",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 78,
+            "inputs": [
+                "conv2d_77"
+            ],
+            "name": "nl_78",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 79,
+            "inputs": [
+                "conv2d_77",
+                "nl_78"
+            ],
+            "name": "eltwise_79",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 4194560,
+                "n_params": 65792,
+                "psize": 66560,
+                "rom_size": 0
+            },
+            "id": 80,
+            "inputs": [
+                "eltwise_79"
+            ],
+            "name": "conv2d_80",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 81,
+            "inputs": [
+                "conv2d_80"
+            ],
+            "name": "nl_81",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 82,
+            "inputs": [
+                "conv2d_80",
+                "nl_81"
+            ],
+            "name": "eltwise_82",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 2,
+                "psize": 8,
+                "rom_size": 0
+            },
+            "id": 83,
+            "inputs": [
+                "eltwise_82"
+            ],
+            "name": "split_83",
+            "original": "SPLIT",
+            "type": "Split"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437312,
+                "n_params": 147584,
+                "psize": 147968,
+                "rom_size": 0
+            },
+            "id": 84,
+            "inputs": [
+                "split_83"
+            ],
+            "name": "conv2d_84",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 81920,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 85,
+            "inputs": [
+                "conv2d_84"
+            ],
+            "name": "nl_85",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 8192,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 86,
+            "inputs": [
+                "conv2d_84",
+                "nl_85"
+            ],
+            "name": "eltwise_86",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437312,
+                "n_params": 147584,
+                "psize": 147968,
+                "rom_size": 0
+            },
+            "id": 87,
+            "inputs": [
+                "eltwise_86"
+            ],
+            "name": "conv2d_87",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 81920,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 88,
+            "inputs": [
+                "conv2d_87"
+            ],
+            "name": "nl_88",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 8192,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 89,
+            "inputs": [
+                "conv2d_87",
+                "nl_88"
+            ],
+            "name": "eltwise_89",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 8192,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 90,
+            "inputs": [
+                "split_83",
+                "eltwise_89"
+            ],
+            "name": "eltwise_90",
+            "original": "ADD",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 91,
+            "inputs": [
+                "split_83",
+                "split_83",
+                "eltwise_90"
+            ],
+            "name": "concat_91",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 6291712,
+                "n_params": 98560,
+                "psize": 99328,
+                "rom_size": 0
+            },
+            "id": 92,
+            "inputs": [
+                "concat_91"
+            ],
+            "name": "conv2d_92",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 93,
+            "inputs": [
+                "conv2d_92"
+            ],
+            "name": "nl_93",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 94,
+            "inputs": [
+                "conv2d_92",
+                "nl_93"
+            ],
+            "name": "eltwise_94",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 2097280,
+                "n_params": 32896,
+                "psize": 33280,
+                "rom_size": 0
+            },
+            "id": 95,
+            "inputs": [
+                "eltwise_94"
+            ],
+            "name": "conv2d_95",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 81920,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 96,
+            "inputs": [
+                "conv2d_95"
+            ],
+            "name": "nl_96",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 8192,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 97,
+            "inputs": [
+                "conv2d_95",
+                "nl_96"
+            ],
+            "name": "eltwise_97",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 204800,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 98,
+            "inputs": [
+                "eltwise_97"
+            ],
+            "name": "pool_98",
+            "original": "MAX_POOL_2D",
+            "type": "Pool"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 204800,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 99,
+            "inputs": [
+                "pool_98"
+            ],
+            "name": "pool_99",
+            "original": "MAX_POOL_2D",
+            "type": "Pool"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 204800,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 100,
+            "inputs": [
+                "pool_99"
+            ],
+            "name": "pool_100",
+            "original": "MAX_POOL_2D",
+            "type": "Pool"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 101,
+            "inputs": [
+                "eltwise_97",
+                "pool_98",
+                "pool_99",
+                "pool_100"
+            ],
+            "name": "concat_101",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 8388864,
+                "n_params": 131328,
+                "psize": 132096,
+                "rom_size": 0
+            },
+            "id": 102,
+            "inputs": [
+                "concat_101"
+            ],
+            "name": "conv2d_102",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 103,
+            "inputs": [
+                "conv2d_102"
+            ],
+            "name": "nl_103",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 104,
+            "inputs": [
+                "conv2d_102",
+                "nl_103"
+            ],
+            "name": "eltwise_104",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32768,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 105,
+            "inputs": [
+                "eltwise_104"
+            ],
+            "name": "conversion_105",
+            "original": "QUANTIZE",
+            "type": "Conversion"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 106,
+            "inputs": [
+                "conversion_105"
+            ],
+            "name": "resize_106",
+            "original": "RESIZE_NEAREST_NEIGHBOR",
+            "type": "Resize"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 107,
+            "inputs": [
+                "resize_106",
+                "eltwise_75"
+            ],
+            "name": "concat_107",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 12583040,
+                "n_params": 49280,
+                "psize": 49664,
+                "rom_size": 0
+            },
+            "id": 108,
+            "inputs": [
+                "concat_107"
+            ],
+            "name": "conv2d_108",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 327680,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 109,
+            "inputs": [
+                "conv2d_108"
+            ],
+            "name": "nl_109",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32768,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 110,
+            "inputs": [
+                "conv2d_108",
+                "nl_109"
+            ],
+            "name": "eltwise_110",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 2,
+                "psize": 8,
+                "rom_size": 0
+            },
+            "id": 111,
+            "inputs": [
+                "eltwise_110"
+            ],
+            "name": "split_111",
+            "original": "SPLIT",
+            "type": "Split"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437248,
+                "n_params": 36928,
+                "psize": 37120,
+                "rom_size": 0
+            },
+            "id": 112,
+            "inputs": [
+                "split_111"
+            ],
+            "name": "conv2d_112",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 113,
+            "inputs": [
+                "conv2d_112"
+            ],
+            "name": "nl_113",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 114,
+            "inputs": [
+                "conv2d_112",
+                "nl_113"
+            ],
+            "name": "eltwise_114",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437248,
+                "n_params": 36928,
+                "psize": 37120,
+                "rom_size": 0
+            },
+            "id": 115,
+            "inputs": [
+                "eltwise_114"
+            ],
+            "name": "conv2d_115",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 116,
+            "inputs": [
+                "conv2d_115"
+            ],
+            "name": "nl_116",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 117,
+            "inputs": [
+                "conv2d_115",
+                "nl_116"
+            ],
+            "name": "eltwise_117",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 118,
+            "inputs": [
+                "split_111",
+                "split_111",
+                "eltwise_117"
+            ],
+            "name": "concat_118",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 6291584,
+                "n_params": 24704,
+                "psize": 25088,
+                "rom_size": 0
+            },
+            "id": 119,
+            "inputs": [
+                "concat_118"
+            ],
+            "name": "conv2d_119",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 327680,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 120,
+            "inputs": [
+                "conv2d_119"
+            ],
+            "name": "nl_120",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32768,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 121,
+            "inputs": [
+                "conv2d_119",
+                "nl_120"
+            ],
+            "name": "eltwise_121",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 65536,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 122,
+            "inputs": [
+                "eltwise_121"
+            ],
+            "name": "conversion_122",
+            "original": "QUANTIZE",
+            "type": "Conversion"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 123,
+            "inputs": [
+                "conversion_122"
+            ],
+            "name": "resize_123",
+            "original": "RESIZE_NEAREST_NEIGHBOR",
+            "type": "Resize"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 124,
+            "inputs": [
+                "resize_123",
+                "eltwise_49"
+            ],
+            "name": "concat_124",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 12582976,
+                "n_params": 12352,
+                "psize": 12544,
+                "rom_size": 0
+            },
+            "id": 125,
+            "inputs": [
+                "concat_124"
+            ],
+            "name": "conv2d_125",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 655360,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 126,
+            "inputs": [
+                "conv2d_125"
+            ],
+            "name": "nl_126",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 65536,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 127,
+            "inputs": [
+                "conv2d_125",
+                "nl_126"
+            ],
+            "name": "eltwise_127",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 2,
+                "psize": 8,
+                "rom_size": 0
+            },
+            "id": 128,
+            "inputs": [
+                "eltwise_127"
+            ],
+            "name": "split_128",
+            "original": "SPLIT",
+            "type": "Split"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437216,
+                "n_params": 9248,
+                "psize": 9344,
+                "rom_size": 0
+            },
+            "id": 129,
+            "inputs": [
+                "split_128"
+            ],
+            "name": "conv2d_129",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 327680,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 130,
+            "inputs": [
+                "conv2d_129"
+            ],
+            "name": "nl_130",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32768,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 131,
+            "inputs": [
+                "conv2d_129",
+                "nl_130"
+            ],
+            "name": "eltwise_131",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437216,
+                "n_params": 9248,
+                "psize": 9344,
+                "rom_size": 0
+            },
+            "id": 132,
+            "inputs": [
+                "eltwise_131"
+            ],
+            "name": "conv2d_132",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 327680,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 133,
+            "inputs": [
+                "conv2d_132"
+            ],
+            "name": "nl_133",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32768,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 134,
+            "inputs": [
+                "conv2d_132",
+                "nl_133"
+            ],
+            "name": "eltwise_134",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 135,
+            "inputs": [
+                "split_128",
+                "split_128",
+                "eltwise_134"
+            ],
+            "name": "concat_135",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 6291520,
+                "n_params": 6208,
+                "psize": 6400,
+                "rom_size": 0
+            },
+            "id": 136,
+            "inputs": [
+                "concat_135"
+            ],
+            "name": "conv2d_136",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 655360,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 137,
+            "inputs": [
+                "conv2d_136"
+            ],
+            "name": "nl_137",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 65536,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 138,
+            "inputs": [
+                "conv2d_136",
+                "nl_137"
+            ],
+            "name": "eltwise_138",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 139,
+            "inputs": [
+                "eltwise_138"
+            ],
+            "name": "pad_139",
+            "original": "PAD",
+            "type": "Pad"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437248,
+                "n_params": 36928,
+                "psize": 37120,
+                "rom_size": 0
+            },
+            "id": 140,
+            "inputs": [
+                "pad_139"
+            ],
+            "name": "conv2d_140",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 141,
+            "inputs": [
+                "conv2d_140"
+            ],
+            "name": "nl_141",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 142,
+            "inputs": [
+                "conv2d_140",
+                "nl_141"
+            ],
+            "name": "eltwise_142",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 143,
+            "inputs": [
+                "eltwise_142",
+                "eltwise_121"
+            ],
+            "name": "concat_143",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 6291584,
+                "n_params": 24704,
+                "psize": 25088,
+                "rom_size": 0
+            },
+            "id": 144,
+            "inputs": [
+                "concat_143"
+            ],
+            "name": "conv2d_144",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 327680,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 145,
+            "inputs": [
+                "conv2d_144"
+            ],
+            "name": "nl_145",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32768,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 146,
+            "inputs": [
+                "conv2d_144",
+                "nl_145"
+            ],
+            "name": "eltwise_146",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 2,
+                "psize": 8,
+                "rom_size": 0
+            },
+            "id": 147,
+            "inputs": [
+                "eltwise_146"
+            ],
+            "name": "split_147",
+            "original": "SPLIT",
+            "type": "Split"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437248,
+                "n_params": 36928,
+                "psize": 37120,
+                "rom_size": 0
+            },
+            "id": 148,
+            "inputs": [
+                "split_147"
+            ],
+            "name": "conv2d_148",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 149,
+            "inputs": [
+                "conv2d_148"
+            ],
+            "name": "nl_149",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 150,
+            "inputs": [
+                "conv2d_148",
+                "nl_149"
+            ],
+            "name": "eltwise_150",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437248,
+                "n_params": 36928,
+                "psize": 37120,
+                "rom_size": 0
+            },
+            "id": 151,
+            "inputs": [
+                "eltwise_150"
+            ],
+            "name": "conv2d_151",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 152,
+            "inputs": [
+                "conv2d_151"
+            ],
+            "name": "nl_152",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 153,
+            "inputs": [
+                "conv2d_151",
+                "nl_152"
+            ],
+            "name": "eltwise_153",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 154,
+            "inputs": [
+                "split_147",
+                "split_147",
+                "eltwise_153"
+            ],
+            "name": "concat_154",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 6291584,
+                "n_params": 24704,
+                "psize": 25088,
+                "rom_size": 0
+            },
+            "id": 155,
+            "inputs": [
+                "concat_154"
+            ],
+            "name": "conv2d_155",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 327680,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 156,
+            "inputs": [
+                "conv2d_155"
+            ],
+            "name": "nl_156",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32768,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 157,
+            "inputs": [
+                "conv2d_155",
+                "nl_156"
+            ],
+            "name": "eltwise_157",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 158,
+            "inputs": [
+                "eltwise_157"
+            ],
+            "name": "pad_158",
+            "original": "PAD",
+            "type": "Pad"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437312,
+                "n_params": 147584,
+                "psize": 147968,
+                "rom_size": 0
+            },
+            "id": 159,
+            "inputs": [
+                "pad_158"
+            ],
+            "name": "conv2d_159",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 81920,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 160,
+            "inputs": [
+                "conv2d_159"
+            ],
+            "name": "nl_160",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 8192,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 161,
+            "inputs": [
+                "conv2d_159",
+                "nl_160"
+            ],
+            "name": "eltwise_161",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 162,
+            "inputs": [
+                "eltwise_161",
+                "eltwise_104"
+            ],
+            "name": "concat_162",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 6291712,
+                "n_params": 98560,
+                "psize": 99328,
+                "rom_size": 0
+            },
+            "id": 163,
+            "inputs": [
+                "concat_162"
+            ],
+            "name": "conv2d_163",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 164,
+            "inputs": [
+                "conv2d_163"
+            ],
+            "name": "nl_164",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 165,
+            "inputs": [
+                "conv2d_163",
+                "nl_164"
+            ],
+            "name": "eltwise_165",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 2,
+                "psize": 8,
+                "rom_size": 0
+            },
+            "id": 166,
+            "inputs": [
+                "eltwise_165"
+            ],
+            "name": "split_166",
+            "original": "SPLIT",
+            "type": "Split"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437312,
+                "n_params": 147584,
+                "psize": 147968,
+                "rom_size": 0
+            },
+            "id": 167,
+            "inputs": [
+                "split_166"
+            ],
+            "name": "conv2d_167",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 81920,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 168,
+            "inputs": [
+                "conv2d_167"
+            ],
+            "name": "nl_168",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 8192,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 169,
+            "inputs": [
+                "conv2d_167",
+                "nl_168"
+            ],
+            "name": "eltwise_169",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437312,
+                "n_params": 147584,
+                "psize": 147968,
+                "rom_size": 0
+            },
+            "id": 170,
+            "inputs": [
+                "eltwise_169"
+            ],
+            "name": "conv2d_170",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 81920,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 171,
+            "inputs": [
+                "conv2d_170"
+            ],
+            "name": "nl_171",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 8192,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 172,
+            "inputs": [
+                "conv2d_170",
+                "nl_171"
+            ],
+            "name": "eltwise_172",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 173,
+            "inputs": [
+                "split_166",
+                "split_166",
+                "eltwise_172"
+            ],
+            "name": "concat_173",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 6291712,
+                "n_params": 98560,
+                "psize": 99328,
+                "rom_size": 0
+            },
+            "id": 174,
+            "inputs": [
+                "concat_173"
+            ],
+            "name": "conv2d_174",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 175,
+            "inputs": [
+                "conv2d_174"
+            ],
+            "name": "nl_175",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 176,
+            "inputs": [
+                "conv2d_174",
+                "nl_175"
+            ],
+            "name": "eltwise_176",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 7520307,
+                "n_params": 117555,
+                "psize": 117708,
+                "rom_size": 0
+            },
+            "id": 177,
+            "inputs": [
+                "eltwise_176"
+            ],
+            "name": "conv2d_177",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32640,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 178,
+            "inputs": [
+                "conv2d_177"
+            ],
+            "name": "nl_178",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 3264,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 179,
+            "inputs": [
+                "conv2d_177",
+                "nl_178"
+            ],
+            "name": "eltwise_179",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 1498227,
+                "n_params": 23460,
+                "psize": 23613,
+                "rom_size": 0
+            },
+            "id": 180,
+            "inputs": [
+                "eltwise_179"
+            ],
+            "name": "conv2d_180",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 32640,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 181,
+            "inputs": [
+                "conv2d_180"
+            ],
+            "name": "nl_181",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 3264,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 182,
+            "inputs": [
+                "conv2d_180",
+                "nl_181"
+            ],
+            "name": "eltwise_182",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 166515,
+                "n_params": 2652,
+                "psize": 2805,
+                "rom_size": 0
+            },
+            "id": 183,
+            "inputs": [
+                "eltwise_182"
+            ],
+            "name": "conv2d_183",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 1632,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 184,
+            "inputs": [
+                "conv2d_183"
+            ],
+            "name": "transpose_184",
+            "original": "TRANSPOSE",
+            "type": "Transpose"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 185,
+            "inputs": [
+                "transpose_184"
+            ],
+            "name": "reshape_185",
+            "original": "RESHAPE",
+            "type": "Reshape"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437248,
+                "n_params": 147520,
+                "psize": 147712,
+                "rom_size": 0
+            },
+            "id": 186,
+            "inputs": [
+                "eltwise_176"
+            ],
+            "name": "conv2d_186",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 40960,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 187,
+            "inputs": [
+                "conv2d_186"
+            ],
+            "name": "nl_187",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 4096,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 188,
+            "inputs": [
+                "conv2d_186",
+                "nl_187"
+            ],
+            "name": "eltwise_188",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 2359360,
+                "n_params": 36928,
+                "psize": 37120,
+                "rom_size": 0
+            },
+            "id": 189,
+            "inputs": [
+                "eltwise_188"
+            ],
+            "name": "conv2d_189",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 40960,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 190,
+            "inputs": [
+                "conv2d_189"
+            ],
+            "name": "nl_190",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 4096,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 191,
+            "inputs": [
+                "conv2d_189",
+                "nl_190"
+            ],
+            "name": "eltwise_191",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 262208,
+                "n_params": 4160,
+                "psize": 4352,
+                "rom_size": 0
+            },
+            "id": 192,
+            "inputs": [
+                "eltwise_191"
+            ],
+            "name": "conv2d_192",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437248,
+                "n_params": 147520,
+                "psize": 147712,
+                "rom_size": 0
+            },
+            "id": 193,
+            "inputs": [
+                "eltwise_176"
+            ],
+            "name": "conv2d_193",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 40960,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 194,
+            "inputs": [
+                "conv2d_193"
+            ],
+            "name": "nl_194",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 4096,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 195,
+            "inputs": [
+                "conv2d_193",
+                "nl_194"
+            ],
+            "name": "eltwise_195",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 2359360,
+                "n_params": 36928,
+                "psize": 37120,
+                "rom_size": 0
+            },
+            "id": 196,
+            "inputs": [
+                "eltwise_195"
+            ],
+            "name": "conv2d_196",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 40960,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 197,
+            "inputs": [
+                "conv2d_196"
+            ],
+            "name": "nl_197",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 4096,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 198,
+            "inputs": [
+                "conv2d_196",
+                "nl_197"
+            ],
+            "name": "eltwise_198",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 4097,
+                "n_params": 65,
+                "psize": 68,
+                "rom_size": 0
+            },
+            "id": 199,
+            "inputs": [
+                "eltwise_198"
+            ],
+            "name": "conv2d_199",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 200,
+            "inputs": [
+                "conv2d_192",
+                "conv2d_199"
+            ],
+            "name": "concat_200",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 2080,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 201,
+            "inputs": [
+                "concat_200"
+            ],
+            "name": "transpose_201",
+            "original": "TRANSPOSE",
+            "type": "Transpose"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 202,
+            "inputs": [
+                "transpose_201"
+            ],
+            "name": "reshape_202",
+            "original": "RESHAPE",
+            "type": "Reshape"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 15040563,
+                "n_params": 58803,
+                "psize": 58956,
+                "rom_size": 0
+            },
+            "id": 203,
+            "inputs": [
+                "eltwise_157"
+            ],
+            "name": "conv2d_203",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 130560,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 204,
+            "inputs": [
+                "conv2d_203"
+            ],
+            "name": "nl_204",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 13056,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 205,
+            "inputs": [
+                "conv2d_203",
+                "nl_204"
+            ],
+            "name": "eltwise_205",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 5992755,
+                "n_params": 23460,
+                "psize": 23613,
+                "rom_size": 0
+            },
+            "id": 206,
+            "inputs": [
+                "eltwise_205"
+            ],
+            "name": "conv2d_206",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 130560,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 207,
+            "inputs": [
+                "conv2d_206"
+            ],
+            "name": "nl_207",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 13056,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 208,
+            "inputs": [
+                "conv2d_206",
+                "nl_207"
+            ],
+            "name": "eltwise_208",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 665907,
+                "n_params": 2652,
+                "psize": 2805,
+                "rom_size": 0
+            },
+            "id": 209,
+            "inputs": [
+                "eltwise_208"
+            ],
+            "name": "conv2d_209",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 6528,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 210,
+            "inputs": [
+                "conv2d_209"
+            ],
+            "name": "transpose_210",
+            "original": "TRANSPOSE",
+            "type": "Transpose"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 211,
+            "inputs": [
+                "transpose_210"
+            ],
+            "name": "reshape_211",
+            "original": "RESHAPE",
+            "type": "Reshape"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 18874432,
+                "n_params": 73792,
+                "psize": 73984,
+                "rom_size": 0
+            },
+            "id": 212,
+            "inputs": [
+                "eltwise_157"
+            ],
+            "name": "conv2d_212",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 213,
+            "inputs": [
+                "conv2d_212"
+            ],
+            "name": "nl_213",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 214,
+            "inputs": [
+                "conv2d_212",
+                "nl_213"
+            ],
+            "name": "eltwise_214",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437248,
+                "n_params": 36928,
+                "psize": 37120,
+                "rom_size": 0
+            },
+            "id": 215,
+            "inputs": [
+                "eltwise_214"
+            ],
+            "name": "conv2d_215",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 216,
+            "inputs": [
+                "conv2d_215"
+            ],
+            "name": "nl_216",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 217,
+            "inputs": [
+                "conv2d_215",
+                "nl_216"
+            ],
+            "name": "eltwise_217",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 1048640,
+                "n_params": 4160,
+                "psize": 4352,
+                "rom_size": 0
+            },
+            "id": 218,
+            "inputs": [
+                "eltwise_217"
+            ],
+            "name": "conv2d_218",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 18874432,
+                "n_params": 73792,
+                "psize": 73984,
+                "rom_size": 0
+            },
+            "id": 219,
+            "inputs": [
+                "eltwise_157"
+            ],
+            "name": "conv2d_219",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 220,
+            "inputs": [
+                "conv2d_219"
+            ],
+            "name": "nl_220",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 221,
+            "inputs": [
+                "conv2d_219",
+                "nl_220"
+            ],
+            "name": "eltwise_221",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 9437248,
+                "n_params": 36928,
+                "psize": 37120,
+                "rom_size": 0
+            },
+            "id": 222,
+            "inputs": [
+                "eltwise_221"
+            ],
+            "name": "conv2d_222",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 163840,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 223,
+            "inputs": [
+                "conv2d_222"
+            ],
+            "name": "nl_223",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16384,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 224,
+            "inputs": [
+                "conv2d_222",
+                "nl_223"
+            ],
+            "name": "eltwise_224",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 16385,
+                "n_params": 65,
+                "psize": 68,
+                "rom_size": 0
+            },
+            "id": 225,
+            "inputs": [
+                "eltwise_224"
+            ],
+            "name": "conv2d_225",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 226,
+            "inputs": [
+                "conv2d_218",
+                "conv2d_225"
+            ],
+            "name": "concat_226",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 8320,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 227,
+            "inputs": [
+                "concat_226"
+            ],
+            "name": "transpose_227",
+            "original": "TRANSPOSE",
+            "type": "Transpose"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 228,
+            "inputs": [
+                "transpose_227"
+            ],
+            "name": "reshape_228",
+            "original": "RESHAPE",
+            "type": "Reshape"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 30081075,
+                "n_params": 29427,
+                "psize": 29580,
+                "rom_size": 0
+            },
+            "id": 229,
+            "inputs": [
+                "eltwise_138"
+            ],
+            "name": "conv2d_229",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 522240,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 230,
+            "inputs": [
+                "conv2d_229"
+            ],
+            "name": "nl_230",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 52224,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 231,
+            "inputs": [
+                "conv2d_229",
+                "nl_230"
+            ],
+            "name": "eltwise_231",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 23970867,
+                "n_params": 23460,
+                "psize": 23613,
+                "rom_size": 0
+            },
+            "id": 232,
+            "inputs": [
+                "eltwise_231"
+            ],
+            "name": "conv2d_232",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 522240,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 233,
+            "inputs": [
+                "conv2d_232"
+            ],
+            "name": "nl_233",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 52224,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 234,
+            "inputs": [
+                "conv2d_232",
+                "nl_233"
+            ],
+            "name": "eltwise_234",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 2663475,
+                "n_params": 2652,
+                "psize": 2805,
+                "rom_size": 0
+            },
+            "id": 235,
+            "inputs": [
+                "eltwise_234"
+            ],
+            "name": "conv2d_235",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 26112,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 236,
+            "inputs": [
+                "conv2d_235"
+            ],
+            "name": "transpose_236",
+            "original": "TRANSPOSE",
+            "type": "Transpose"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 237,
+            "inputs": [
+                "transpose_236"
+            ],
+            "name": "reshape_237",
+            "original": "RESHAPE",
+            "type": "Reshape"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 238,
+            "inputs": [
+                "reshape_237",
+                "reshape_211",
+                "reshape_185"
+            ],
+            "name": "concat_238",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 239,
+            "inputs": [
+                "concat_238"
+            ],
+            "name": "reshape_239",
+            "original": "RESHAPE",
+            "type": "Reshape"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 37748800,
+                "n_params": 36928,
+                "psize": 37120,
+                "rom_size": 0
+            },
+            "id": 240,
+            "inputs": [
+                "eltwise_138"
+            ],
+            "name": "conv2d_240",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 655360,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 241,
+            "inputs": [
+                "conv2d_240"
+            ],
+            "name": "nl_241",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 65536,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 242,
+            "inputs": [
+                "conv2d_240",
+                "nl_241"
+            ],
+            "name": "eltwise_242",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 37748800,
+                "n_params": 36928,
+                "psize": 37120,
+                "rom_size": 0
+            },
+            "id": 243,
+            "inputs": [
+                "eltwise_242"
+            ],
+            "name": "conv2d_243",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 655360,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 244,
+            "inputs": [
+                "conv2d_243"
+            ],
+            "name": "nl_244",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 65536,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 245,
+            "inputs": [
+                "conv2d_243",
+                "nl_244"
+            ],
+            "name": "eltwise_245",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 4194368,
+                "n_params": 4160,
+                "psize": 4352,
+                "rom_size": 0
+            },
+            "id": 246,
+            "inputs": [
+                "eltwise_245"
+            ],
+            "name": "conv2d_246",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 37748800,
+                "n_params": 36928,
+                "psize": 37120,
+                "rom_size": 0
+            },
+            "id": 247,
+            "inputs": [
+                "eltwise_138"
+            ],
+            "name": "conv2d_247",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 655360,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 248,
+            "inputs": [
+                "conv2d_247"
+            ],
+            "name": "nl_248",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 65536,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 249,
+            "inputs": [
+                "conv2d_247",
+                "nl_248"
+            ],
+            "name": "eltwise_249",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 37748800,
+                "n_params": 36928,
+                "psize": 37120,
+                "rom_size": 0
+            },
+            "id": 250,
+            "inputs": [
+                "eltwise_249"
+            ],
+            "name": "conv2d_250",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 655360,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 251,
+            "inputs": [
+                "conv2d_250"
+            ],
+            "name": "nl_251",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 65536,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 252,
+            "inputs": [
+                "conv2d_250",
+                "nl_251"
+            ],
+            "name": "eltwise_252",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 65537,
+                "n_params": 65,
+                "psize": 68,
+                "rom_size": 0
+            },
+            "id": 253,
+            "inputs": [
+                "eltwise_252"
+            ],
+            "name": "conv2d_253",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 254,
+            "inputs": [
+                "conv2d_246",
+                "conv2d_253"
+            ],
+            "name": "concat_254",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 33280,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 255,
+            "inputs": [
+                "concat_254"
+            ],
+            "name": "transpose_255",
+            "original": "TRANSPOSE",
+            "type": "Transpose"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 256,
+            "inputs": [
+                "transpose_255"
+            ],
+            "name": "reshape_256",
+            "original": "RESHAPE",
+            "type": "Reshape"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 257,
+            "inputs": [
+                "reshape_256",
+                "reshape_228",
+                "reshape_202"
+            ],
+            "name": "concat_257",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 258,
+            "inputs": [
+                "concat_257"
+            ],
+            "name": "slice_258",
+            "original": "STRIDED_SLICE",
+            "type": "Slice"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 13440,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 259,
+            "inputs": [
+                "slice_258"
+            ],
+            "name": "nl_259",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 2688,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 260,
+            "inputs": [
+                "nl_259"
+            ],
+            "name": "conversion_260",
+            "original": "QUANTIZE",
+            "type": "Conversion"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 261,
+            "inputs": [
+                "reshape_239"
+            ],
+            "name": "slice_261",
+            "original": "STRIDED_SLICE",
+            "type": "Slice"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 1,
+                "psize": 1,
+                "rom_size": 0
+            },
+            "id": 262,
+            "inputs": [],
+            "name": "Const_12",
+            "original": "",
+            "type": "Placeholder"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 45696,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 262,
+            "inputs": [
+                "slice_261",
+                "Const_12"
+            ],
+            "name": "eltwise_262",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 2688,
+                "psize": 2688,
+                "rom_size": 0
+            },
+            "id": 263,
+            "inputs": [],
+            "name": "model_6_tf_math_multiply_202_Mul_y",
+            "original": "",
+            "type": "Placeholder"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 45696,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 263,
+            "inputs": [
+                "eltwise_262",
+                "model_6_tf_math_multiply_202_Mul_y"
+            ],
+            "name": "eltwise_263",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 2688,
+                "psize": 2688,
+                "rom_size": 0
+            },
+            "id": 264,
+            "inputs": [],
+            "name": "Const_9",
+            "original": "",
+            "type": "Placeholder"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 45696,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 264,
+            "inputs": [
+                "eltwise_263",
+                "Const_9"
+            ],
+            "name": "eltwise_264",
+            "original": "ADD",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 265,
+            "inputs": [
+                "reshape_239"
+            ],
+            "name": "slice_265",
+            "original": "STRIDED_SLICE",
+            "type": "Slice"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 228480,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 266,
+            "inputs": [
+                "slice_265"
+            ],
+            "name": "nl_266",
+            "original": "LOGISTIC",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 45696,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 267,
+            "inputs": [
+                "nl_266"
+            ],
+            "name": "conversion_267",
+            "original": "QUANTIZE",
+            "type": "Conversion"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 268,
+            "inputs": [
+                "eltwise_264",
+                "conversion_267"
+            ],
+            "name": "concat_268",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 269,
+            "inputs": [
+                "concat_268"
+            ],
+            "name": "reshape_269",
+            "original": "RESHAPE",
+            "type": "Reshape"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 270,
+            "inputs": [
+                "concat_257"
+            ],
+            "name": "slice_270",
+            "original": "STRIDED_SLICE",
+            "type": "Slice"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 271,
+            "inputs": [
+                "slice_270"
+            ],
+            "name": "reshape_271",
+            "original": "RESHAPE",
+            "type": "Reshape"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 43008,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 272,
+            "inputs": [
+                "reshape_271"
+            ],
+            "name": "transpose_272",
+            "original": "TRANSPOSE",
+            "type": "Transpose"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 43008,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 273,
+            "inputs": [
+                "transpose_272"
+            ],
+            "name": "transpose_273",
+            "original": "TRANSPOSE",
+            "type": "Transpose"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 1290240,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 274,
+            "inputs": [
+                "transpose_273"
+            ],
+            "name": "nl_274",
+            "original": "SOFTMAX",
+            "type": "Nonlinearity"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 86017,
+                "n_params": 17,
+                "psize": 20,
+                "rom_size": 0
+            },
+            "id": 275,
+            "inputs": [
+                "nl_274"
+            ],
+            "name": "conv2d_275",
+            "original": "CONV_2D",
+            "type": "Conv2D"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 276,
+            "inputs": [
+                "conv2d_275"
+            ],
+            "name": "reshape_276",
+            "original": "RESHAPE",
+            "type": "Reshape"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 5376,
+                "psize": 5376,
+                "rom_size": 0
+            },
+            "id": 277,
+            "inputs": [],
+            "name": "model_6_tf_math_multiply_205_Mul_y",
+            "original": "",
+            "type": "Placeholder"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 5376,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 277,
+            "inputs": [
+                "reshape_276",
+                "model_6_tf_math_multiply_205_Mul_y"
+            ],
+            "name": "eltwise_277",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 278,
+            "inputs": [
+                "eltwise_277"
+            ],
+            "name": "reshape_278",
+            "original": "RESHAPE",
+            "type": "Reshape"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 279,
+            "inputs": [
+                "reshape_278"
+            ],
+            "name": "slice_279",
+            "original": "STRIDED_SLICE",
+            "type": "Slice"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 2688,
+                "psize": 2688,
+                "rom_size": 0
+            },
+            "id": 280,
+            "inputs": [],
+            "name": "Const_3",
+            "original": "",
+            "type": "Placeholder"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 2688,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 280,
+            "inputs": [
+                "Const_3",
+                "slice_279"
+            ],
+            "name": "eltwise_280",
+            "original": "SUB",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 281,
+            "inputs": [
+                "reshape_278"
+            ],
+            "name": "slice_281",
+            "original": "STRIDED_SLICE",
+            "type": "Slice"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 2688,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 282,
+            "inputs": [
+                "slice_281",
+                "Const_3"
+            ],
+            "name": "eltwise_282",
+            "original": "ADD",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 2688,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 283,
+            "inputs": [
+                "eltwise_280",
+                "eltwise_282"
+            ],
+            "name": "eltwise_283",
+            "original": "ADD",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 1,
+                "psize": 1,
+                "rom_size": 0
+            },
+            "id": 284,
+            "inputs": [],
+            "name": "model_6_tf_math_divide_truedivConst",
+            "original": "",
+            "type": "Placeholder"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 2688,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 284,
+            "inputs": [
+                "eltwise_283",
+                "model_6_tf_math_divide_truedivConst"
+            ],
+            "name": "eltwise_284",
+            "original": "MUL",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 2688,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 285,
+            "inputs": [
+                "eltwise_282",
+                "eltwise_280"
+            ],
+            "name": "eltwise_285",
+            "original": "SUB",
+            "type": "Eltwise"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 0,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 286,
+            "inputs": [
+                "eltwise_284",
+                "eltwise_285",
+                "conversion_260",
+                "reshape_269"
+            ],
+            "name": "concat_286",
+            "original": "CONCATENATION",
+            "type": "Concat"
+        },
+        {
+            "c_id": [],
+            "extras": {
+                "n_macc": 150528,
+                "n_params": 0,
+                "psize": 0,
+                "rom_size": 0
+            },
+            "id": 287,
+            "inputs": [
+                "concat_286"
+            ],
+            "name": "conversion_287",
+            "original": "DEQUANTIZE",
+            "type": "Conversion"
+        }
+    ],
+    "model_files": [
+        "Y:\\VM\\stm-workspace\\fall-guard-v3.0.0\\Model\\yolov8n_256_quant_pc_uf_pose_coco-st.tflite"
+    ],
+    "model_n_params": 3303423,
+    "model_name": "yolov8n_256_quant_pc_uf_pose_cocost",
+    "model_size": 3321036,
+    "model_type": "tflite",
+    "name": "network",
+    "outputs": [
+        "Transpose_663_out_0"
+    ],
+    "ram_io_size": [
+        196608,
+        301056
+    ],
+    "ram_size": 932864,
+    "report_version": 1.1,
+    "rom_cfact": 1.0,
+    "rom_heap_inspector": 2048,
+    "rom_inputs": [
+        {
+            "c_size": 196608,
+            "c_type": "u8",
+            "name": "Input_6_out_0"
+        }
+    ],
+    "rom_n_macc": 0,
+    "rom_outputs": [
+        {
+            "c_size": 301056,
+            "c_type": "float",
+            "name": "Transpose_663_out_0"
+        }
+    ],
+    "rom_size": 3343585,
+    "strategy": "",
+    "tools_api_version": "2.0.0-20049",
+    "tools_version": "2.0.0-20049",
+    "val_error": -1.0,
+    "val_error_desc": "None (None) #-1",
+    "val_metrics": []
+}

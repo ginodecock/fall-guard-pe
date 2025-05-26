@@ -1,0 +1,12 @@
+Y:/VM/stm-workspace/fall-guard-pe/Lib/AI_Runtime/Npu/ll_aton/ll_aton_osal_threadx.h:85:22:_my_disable_preemption	1
+Y:/VM/stm-workspace/fall-guard-pe/Lib/AI_Runtime/Npu/ll_aton/ll_aton_osal_threadx.h:140:22:_my_tx_thread_priority_get	1
+Y:/VM/stm-workspace/fall-guard-pe/Lib/AI_Runtime/Npu/ll_aton/ll_aton_osal_threadx.h:148:22:_my_tx_thread_priority_change	1
+Y:/VM/stm-workspace/fall-guard-pe/Lib/AI_Runtime/Npu/ll_aton/ll_aton_osal_threadx.h:102:22:_my_enable_preemption	1
+Y:/VM/stm-workspace/fall-guard-pe/Lib/AI_Runtime/Npu/ll_aton/ll_aton_osal_rtos_template.c:52:6:aton_osal_threadx_init	1
+Y:/VM/stm-workspace/fall-guard-pe/Lib/AI_Runtime/Npu/ll_aton/ll_aton_osal_rtos_template.c:86:6:aton_osal_threadx_deinit	1
+Y:/VM/stm-workspace/fall-guard-pe/Lib/AI_Runtime/Npu/ll_aton/ll_aton_osal_rtos_template.c:95:6:aton_osal_threadx_dao_lock	3
+Y:/VM/stm-workspace/fall-guard-pe/Lib/AI_Runtime/Npu/ll_aton/ll_aton_osal_rtos_template.c:164:6:aton_osal_threadx_dao_unlock	4
+Y:/VM/stm-workspace/fall-guard-pe/Lib/AI_Runtime/Npu/ll_aton/ll_aton_osal_rtos_template.c:221:6:aton_osal_threadx_lock	1
+Y:/VM/stm-workspace/fall-guard-pe/Lib/AI_Runtime/Npu/ll_aton/ll_aton_osal_rtos_template.c:233:6:aton_osal_threadx_unlock	1
+Y:/VM/stm-workspace/fall-guard-pe/Lib/AI_Runtime/Npu/ll_aton/ll_aton_osal_rtos_template.c:272:6:aton_osal_threadx_wfe	1
+Y:/VM/stm-workspace/fall-guard-pe/Lib/AI_Runtime/Npu/ll_aton/ll_aton_osal_rtos_template.c:287:6:aton_osal_threadx_signal_event	1
