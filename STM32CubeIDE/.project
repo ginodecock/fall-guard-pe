@@ -4144,7 +4144,7 @@
 		<link>
 			<name>STM32Cube_FW_N6/Middlewares/NetXDuo/Network/Ethernet Phy Interface/RTL8211_Phy_Interface/nx_stm32_phy_driver.c</name>
 			<type>1</type>
-			<location>Y:/VM/stm-workspace/STM32CubeN6/Middlewares/ST/netxduo/common/drivers/ethernet/rtl8211/nx_stm32_phy_driver.c</location>
+			<location>PARENT-1-PROJECT_LOC/STM32Cube_FW_N6/Middlewares/ST/netxduo/common/drivers/ethernet/rtl8211/nx_stm32_phy_driver.c</location>
 		</link>
 		<link>
 			<name>STM32Cube_FW_N6/Middlewares/ST/threadx/common/src/tx_block_allocate.c</name>

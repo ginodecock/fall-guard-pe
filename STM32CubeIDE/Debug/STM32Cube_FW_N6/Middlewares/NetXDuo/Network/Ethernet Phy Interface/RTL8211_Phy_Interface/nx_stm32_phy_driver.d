@@ -1,5 +1,5 @@
 STM32Cube_FW_N6/Middlewares/NetXDuo/Network/Ethernet Phy Interface/RTL8211_Phy_Interface/nx_stm32_phy_driver.o: \
- Y:/VM/stm-workspace/STM32CubeN6/Middlewares/ST/netxduo/common/drivers/ethernet/rtl8211/nx_stm32_phy_driver.c \
+ Y:/VM/stm-workspace/fall-guard-pe/STM32Cube_FW_N6/Middlewares/ST/netxduo/common/drivers/ethernet/rtl8211/nx_stm32_phy_driver.c \
  ../../STM32Cube_FW_N6/Middlewares/ST/netxduo/common/drivers/ethernet/nx_stm32_phy_driver.h \
  ../../Inc/nx_stm32_eth_config.h \
  ../../STM32Cube_FW_N6/Drivers/STM32N6xx_HAL_Driver/Inc/stm32n6xx_hal.h \

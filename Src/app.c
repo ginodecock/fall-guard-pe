@@ -1022,7 +1022,19 @@ HAL_StatusTypeDef TSL2561_Init(I2C_HandleTypeDef *hi2c) {
     cmd[1] = 0x02;         // 402ms, low gain
     return HAL_I2C_Master_Transmit(hi2c, TSL2561_ADDR << 1, cmd, 2, 100);
 }
+/* I2C Scanner Function */
+void I2C_ScanBus(void) {
+    printf("\r\nScanning I2C bus...\r\n");
 
+    for(uint8_t address = 1; address < 128; address++) {
+        HAL_StatusTypeDef status = HAL_I2C_IsDeviceReady(&hi2c1, (uint16_t)(address << 1), 3, 10);
+
+        if(status == HAL_OK) {
+            printf("Device found at 0x%02X\r\n", address);
+        }
+    }
+    printf("Scan complete\r\n\r\n");
+}
 HAL_StatusTypeDef TSL2561_ReadData(I2C_HandleTypeDef *hi2c, uint16_t *ch0, uint16_t *ch1) {
     uint8_t data[4];
     uint8_t cmd;
@@ -1048,7 +1060,7 @@ HAL_StatusTypeDef TSL2561_ReadData(I2C_HandleTypeDef *hi2c, uint16_t *ch0, uint1
 bool TSL2561_IsConnected(I2C_HandleTypeDef *hi2c)
 {
     const uint32_t trials = 3;
-    const uint32_t timeout = 100; // in milliseconds
+    const uint32_t timeout = 10; // in milliseconds
     HAL_StatusTypeDef result = HAL_I2C_IsDeviceReady(hi2c, (TSL2561_ADDR<< 1), trials, timeout);
 
     // Check if the communication was successful.
@@ -1186,6 +1198,8 @@ void app_run()
   ret = tx_thread_create(&isp_thread, "isp", isp_thread_fct, 0, isp_tread_stack,
                          sizeof(isp_tread_stack), isp_priority, isp_priority, time_slice, TX_AUTO_START);
   assert(ret == TX_SUCCESS);
+  I2C_ScanBus();
+
   if (TSL2561_IsConnected(&hi2c1) == true){
 	  ret = tx_thread_create(&AppTSL2561Thread, "TSL2561", App_TSL2561_Thread_Entry, 0,tsl2561_thread_stack, sizeof(tsl2561_thread_stack), 15, 15, 0, TX_AUTO_START);
 	  assert(ret == TX_SUCCESS);
