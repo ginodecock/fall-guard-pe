@@ -39,23 +39,15 @@
 #include "nx_stm32_eth_driver.h"
 #include "stm32n6xx.h"
 #include "app_threadx.h"
-
 #define USE_STATIC_ALLOCATION                    1
-
 #define TX_APP_MEM_POOL_SIZE                     1024
-
 #define NX_APP_MEM_POOL_SIZE                     50*1024
-
 #if (USE_STATIC_ALLOCATION == 1)
-/* USER CODE BEGIN TX_Pool_Buffer */
-/* USER CODE END TX_Pool_Buffer */
 #if defined ( __ICCARM__ )
 #pragma data_alignment=4
 #endif
 __ALIGN_BEGIN static UCHAR tx_byte_pool_buffer[TX_APP_MEM_POOL_SIZE] __ALIGN_END;
 static TX_BYTE_POOL tx_app_byte_pool;
-
-/* USER CODE BEGIN NX_Pool_Buffer */
 #if defined ( __ICCARM__ ) /* IAR Compiler */
 #pragma location = ".NetXPoolSection"
 #else /* GNU and AC6 compilers */
@@ -67,9 +59,7 @@ __attribute__((section(".NetXPoolSection")))
 #endif
 __ALIGN_BEGIN static UCHAR nx_byte_pool_buffer[NX_APP_MEM_POOL_SIZE] __ALIGN_END;
 static TX_BYTE_POOL nx_app_byte_pool;
-
 #endif
-
 TX_THREAD      NxAppThread;
 NX_PACKET_POOL NxAppPool;
 NX_IP          NetXDuoEthIpInstance;
@@ -78,8 +68,6 @@ NX_DHCP        DHCPClient;
 
 ULONG          IpAddress;
 ULONG          NetMask;
-/* USER CODE BEGIN PV */
-//extern RNG_HandleTypeDef hrng;
 
 TX_THREAD AppMQTTClientThread;
 TX_THREAD AppMQTTClientThreadLog;
@@ -94,33 +82,41 @@ static NX_DNS   DnsClient;
 uint8_t MACAddr[6];
 RTC_HandleTypeDef hrtc;
 uint8_t prev_nb_person;
+uint8_t prev_target_state;
 ULONG prev_timestamp;
 int prev_state_detect;
-// Shared resources between threads
-#define MEASUREMENT_QUEUE_DEPTH  20
-#define MEASUREMENT_QUEUE_MSG_SIZE sizeof(sensor_data_t)
 
-/* Define a structure for your sensor data */
+// Shared resources between threads
+#define TSL2561_ADDR          0x39
+extern I2C_HandleTypeDef hi2c1;  // Ensure I2C is initialized elsewhere
+
+/* Structures for collected data */
 typedef struct {
-    float nb_detect;
-    ULONG timestamp;
-    int state_detect;
-} sensor_data_t;
-typedef struct NXD_MQTT_MESSAGE_STRUCT {
-    UCHAR *topic;       /* Pointer to message topic */
-    ULONG topic_length; /* Topic length in bytes */
-    UCHAR *payload;     /* Pointer to message payload */
-    ULONG payload_length; /* Payload length in bytes */
-    UCHAR qos_level;    /* QoS level of message */
-    UCHAR retain;       /* Retain flag */
-} NXD_MQTT_MESSAGE;
+    int nb_detect;
+    int event;
+} thread_com_data_t;
+#define MEASUREMENT_QUEUE_DEPTH  10
+#define MEASUREMENT_QUEUE_MSG_SIZE sizeof(thread_com_data_t)
 /* Create a message queue */
 TX_QUEUE measurement_queue;
 UCHAR measurement_queue_buffer[MEASUREMENT_QUEUE_DEPTH * MEASUREMENT_QUEUE_MSG_SIZE];
 
+#define LD2410_FRAME_HEADER_LEN 4
+#define LD2410_FRAME_TAIL_LEN   4
+#define LD2410_FRAME_TOTAL_LEN  23  // Basic mode frame length
+#define LD2410_HEADER {0xF4, 0xF3, 0xF2, 0xF1}
+#define LD2410_TAIL   {0xF8, 0xF7, 0xF6, 0xF5}
 
-#define QUEUE_DEPTH 10
-#define QUEUE_MSG_SIZE 256
+typedef struct {
+	float lux;
+	int16_t target_state;
+    int16_t moving_target_dist;
+    uint8_t moving_target_energy;
+    int16_t static_target_dist;
+    uint8_t static_target_energy;
+    int16_t distance;
+} environment_sensor_data_t;
+static environment_sensor_data_t room_sensor_data;
 
 TX_EVENT_FLAGS_GROUP     SntpFlags;
 
@@ -139,7 +135,6 @@ static UCHAR topic_buffer[NXD_MQTT_MAX_TOPIC_NAME_LENGTH];
 /* Define the TLS packet reassembly buffer. */
 UCHAR tls_packet_buffer[4000];
 ULONG current_time;
-/* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 static VOID nx_app_thread_entry (ULONG thread_input);
@@ -162,25 +157,18 @@ static UINT dns_create(NX_DNS *dns_ptr);
 
 static void SetRtcFromEpoch(uint32_t epoch);
 static uint32_t GetRtcEpoch();
-
-
 #define CACHE_OP(__op__) do { \
   if (is_cache_enable()) { \
     __op__; \
   } \
 } while (0)
-
 #define ALIGN_VALUE(_v_,_a_) (((_v_) + (_a_) - 1) & ~((_a_) - 1))
-
 #define LCD_FG_WIDTH LCD_BG_WIDTH
 #define LCD_FG_HEIGHT LCD_BG_HEIGHT
-
 #define NUMBER_COLORS 10
 #define BQUEUE_MAX_BUFFERS 3
 #define CPU_LOAD_HISTORY_DEPTH 8
-
 #define CIRCLE_RADIUS 5
-/* Must be odd */
 #define BINDING_WIDTH 3
 #define COLOR_HEAD UTIL_LCD_COLOR_GREEN
 #define COLOR_ARMS UTIL_LCD_COLOR_BLUE
@@ -192,7 +180,7 @@ static uint32_t GetRtcEpoch();
 
 /* Align so we are sure nn_output_buffers[0] and nn_output_buffers[1] are aligned on 32 bytes */
 #define NN_BUFFER_OUT_SIZE_ALIGN ALIGN_VALUE(NN_BUFFER_OUT_SIZE, 32)
-
+extern UART_HandleTypeDef huart2;
 typedef struct
 {
   uint32_t X0;
@@ -340,14 +328,19 @@ static uint8_t dp_tread_stack[4096];
   /* isp thread */
 static TX_THREAD isp_thread;
 static uint8_t isp_tread_stack[4096];
+/*TSL2561 thread*/
+static TX_THREAD AppTSL2561Thread;
+static uint8_t tsl2561_thread_stack[4096];
+/*ld2410 thread*/
+static TX_THREAD ld2410_thread;
+static uint8_t ld2410_thread_stack[4096];
+
 static TX_SEMAPHORE isp_sem;
 
 #define FRAME_HISTORY 10
 static mpe_pp_keyPoints_t nose_history[FRAME_HISTORY][AI_MPE_YOLOV8_PP_MAX_BOXES_LIMIT];
 static uint8_t frame_index = 0;
 static int initialized_frames = 0;
-
-
 
 static int is_cache_enable()
 {
@@ -357,7 +350,38 @@ static int is_cache_enable()
   return 0;
 #endif
 }
+// Helper: Parse a single LD2410 frame
+int parse_ld2410_frame(const uint8_t *frame, size_t len, environment_sensor_data_t *out)
+{
+    const uint8_t header[LD2410_FRAME_HEADER_LEN] = LD2410_HEADER;
+    const uint8_t tail[LD2410_FRAME_TAIL_LEN] = LD2410_TAIL;
+    if (len < LD2410_FRAME_TOTAL_LEN) return -1;
 
+    // Check header and tail
+    if (memcmp(frame, header, LD2410_FRAME_HEADER_LEN) != 0) return -2;
+    if (memcmp(frame + LD2410_FRAME_TOTAL_LEN - LD2410_FRAME_TAIL_LEN, tail, LD2410_FRAME_TAIL_LEN) != 0) return -3;
+
+    // Data fields
+    const uint8_t *target_data = frame + 8; // skip header, len, type, head
+    if (len < 8 + 9 + 6) return -4; // ensure enough data
+
+    // Parse target state
+    /*switch (target_data[0]) {
+        case 0x00: strcpy(out->target_state, "no_one"); break;
+        case 0x01: strcpy(out->target_state, "moving"); break;
+        case 0x02: strcpy(out->target_state, "static"); break;
+        case 0x03: strcpy(out->target_state, "both"); break;
+        default:   strcpy(out->target_state, "unknown"); break;
+    }*/
+    out->target_state		  = target_data[0];
+    out->moving_target_dist   = target_data[1] | (target_data[2] << 8);
+    out->moving_target_energy = target_data[3];
+    out->static_target_dist   = target_data[4] | (target_data[5] << 8);
+    out->static_target_energy = target_data[6];
+    out->distance             = target_data[7] | (target_data[8] << 8);
+
+    return 0;
+}
 static void cpuload_init(cpuload_info_t *cpu_load)
 {
   memset(cpu_load, 0, sizeof(cpuload_info_t));
@@ -679,7 +703,7 @@ static void Display_NetworkOutput(display_info_t *info)
   int line_nb = 0;
   float nn_fps;
   int i;
-  sensor_data_t data;
+  thread_com_data_t thread_com_data;
   /* clear previous ui */
   UTIL_LCD_FillRect(lcd_fg_area.X0, lcd_fg_area.Y0, lcd_fg_area.XSize, lcd_fg_area.YSize, 0x00000000); /* Clear previous boxes */
 
@@ -691,34 +715,40 @@ static void Display_NetworkOutput(display_info_t *info)
   	  prev_timestamp = GetRtcEpoch();
         if (nb_rois != prev_nb_person){
   	     printf("persons detected = %lu\n\r",nb_rois);
-           prev_nb_person = nb_rois;
-  	     /* Allocate the memory for MQTT client thread   */
-  	     data.nb_detect = prev_nb_person;
-  	     data.timestamp = GetRtcEpoch();
-  	     data.state_detect = 1; //Normal person state
+         prev_nb_person = nb_rois;
+         thread_com_data.nb_detect = (int)prev_nb_person;
+         thread_com_data.event = 1; //Normal person state
   	     prev_state_detect = 1;
 
   	     /* Send to MQTT thread */
-  	     tx_queue_send(&measurement_queue, &data, TX_NO_WAIT);
+  	     tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
   	  //tx_thread_sleep(1000);  // Adjust sampling rate as needed
   	  }
+      if (room_sensor_data.target_state != prev_target_state){
+      	 printf("Room change detected = %d\n\r",room_sensor_data.target_state);
+       	 prev_target_state = room_sensor_data.target_state;
+       	 thread_com_data.nb_detect = (int)nb_rois;
+       	 thread_com_data.event = 2; //Room change detection
+
+         /* Send to MQTT thread */
+         tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
+      }
     }
-  /* draw metrics */
   nn_fps = 1000.0 / info->nn_period_ms;
+
 #if 1
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb),  RIGHT_MODE, "Cpu load");
+  UTIL_LCDEx_PrintfAt(0, LINE(line_nb),  RIGHT_MODE, "Cpu: %.1f%%",cpu_load_one_second);
+  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), LEFT_MODE, "lux: %.2f", room_sensor_data.lux);
   line_nb += 1;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb),  RIGHT_MODE, "   %.1f%%", cpu_load_one_second);
-  line_nb += 2;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "Inference");
+  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "   FPS: %.2f",nn_fps);
+  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), LEFT_MODE, "Stat: %d", room_sensor_data.target_state);
   line_nb += 1;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "   %ums", info->inf_ms);
-  line_nb += 2;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "   FPS");
+  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, " Obj: %u", nb_rois);
+  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), LEFT_MODE, "Move: %dcm,%d", room_sensor_data.moving_target_dist,room_sensor_data.moving_target_energy);
   line_nb += 1;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "  %.2f", nn_fps);
-  line_nb += 2;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, " Objects %u", nb_rois);
+  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), LEFT_MODE, "Stat: %dcm,%d", room_sensor_data.static_target_dist, room_sensor_data.static_target_energy);
+  line_nb += 1;
+  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), LEFT_MODE, "Dist: %dcm", room_sensor_data.distance);
   line_nb += 1;
 #else
   (void) nn_fps;
@@ -776,12 +806,11 @@ static void Display_NetworkOutput(display_info_t *info)
                      UTIL_LCDEx_PrintfAt(0, 10, LEFT_MODE, "Fall detected!");
                	     printf("Fall detected!\n\r");
                	     /* Allocate the memory for MQTT client thread   */
-               	     data.nb_detect = nb_rois;
-               	     data.timestamp = GetRtcEpoch();
-               	     data.state_detect = 13; //Fall detected!
+               	     thread_com_data.nb_detect = nb_rois;
+               	     thread_com_data.event = 13; //Fall detected!
                	     /* Send to MQTT thread */
                	     if (prev_state_detect != 13){
-               	     	 tx_queue_send(&measurement_queue, &data, TX_NO_WAIT);
+               	     	 tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
                	     	 prev_state_detect = 13;
                	     }
 
@@ -977,7 +1006,131 @@ static void isp_thread_fct(ULONG arg)
     CAM_IspUpdate();
   }
 }
+/* TSL2561 Helper Functions */
+HAL_StatusTypeDef TSL2561_Init(I2C_HandleTypeDef *hi2c) {
+    uint8_t cmd[2];
 
+    // Power on
+    cmd[0] = 0x80 | 0x00;  // Command + Control reg
+    cmd[1] = 0x03;          // Power ON
+    if (HAL_I2C_Master_Transmit(hi2c, TSL2561_ADDR << 1, cmd, 2, 100) != HAL_OK) {
+        return HAL_ERROR;
+    }
+
+    // Set timing: 402ms integration, low gain
+    cmd[0] = 0x80 | 0x01;  // Command + Timing reg
+    cmd[1] = 0x02;         // 402ms, low gain
+    return HAL_I2C_Master_Transmit(hi2c, TSL2561_ADDR << 1, cmd, 2, 100);
+}
+
+HAL_StatusTypeDef TSL2561_ReadData(I2C_HandleTypeDef *hi2c, uint16_t *ch0, uint16_t *ch1) {
+    uint8_t data[4];
+    uint8_t cmd;
+
+    // Read Channel 0 (0x8C and 0x8D)
+    cmd = 0x80 | 0x8C;  // Command + Data0 low
+    if (HAL_I2C_Master_Transmit(hi2c, TSL2561_ADDR << 1, &cmd, 1, 100) != HAL_OK ||
+        HAL_I2C_Master_Receive(hi2c, TSL2561_ADDR << 1, data, 2, 100) != HAL_OK) {
+        return HAL_ERROR;
+    }
+    *ch0 = (data[1] << 8) | data[0];
+
+    // Read Channel 1 (0x8E and 0x8F)
+    cmd = 0x80 | 0x8E;  // Command + Data1 low
+    if (HAL_I2C_Master_Transmit(hi2c, TSL2561_ADDR << 1, &cmd, 1, 100) != HAL_OK ||
+        HAL_I2C_Master_Receive(hi2c, TSL2561_ADDR << 1, data+2, 2, 100) != HAL_OK) {
+        return HAL_ERROR;
+    }
+    *ch1 = (data[3] << 8) | data[2];
+
+    return HAL_OK;
+}
+bool TSL2561_IsConnected(I2C_HandleTypeDef *hi2c)
+{
+    const uint32_t trials = 3;
+    const uint32_t timeout = 100; // in milliseconds
+    HAL_StatusTypeDef result = HAL_I2C_IsDeviceReady(hi2c, (TSL2561_ADDR<< 1), trials, timeout);
+
+    // Check if the communication was successful.
+    if (result == HAL_OK)
+    {
+        // Device acknowledged its address.
+        return true;
+    }
+    else
+    {
+        // Device did not acknowledge its address. It might be disconnected,
+        // powered off, or have a different I2C address.
+        return false;
+    }
+}
+float TSL2561_CalculateLux(uint16_t ch0, uint16_t ch1) {
+    if (ch0 == 0) return 0;
+
+    float ratio = (float)ch1 / ch0;
+    if (ratio <= 0.5) {
+        return (0.0304 * ch0) - (0.062 * ch0 * powf(ratio, 1.4));
+    } else if (ratio <= 0.61) {
+        return (0.0224 * ch0) - (0.031 * ch1);
+    } else if (ratio <= 0.80) {
+        return (0.0128 * ch0) - (0.0153 * ch1);
+    } else if (ratio <= 1.30) {
+        return (0.00146 * ch0) - (0.00112 * ch1);
+    }
+    return 0;
+}
+/* Thread Entry Function */
+static VOID App_TSL2561_Thread_Entry(ULONG thread_input) {
+	if (TSL2561_Init(&hi2c1) != HAL_OK) {
+	      printf("TSL2561 Init Failed!\n");
+	      return;
+	}
+	while(1) {
+        uint16_t ch0, ch1;
+
+
+        if (TSL2561_ReadData(&hi2c1, &ch0, &ch1) == HAL_OK) {
+        	room_sensor_data.lux = TSL2561_CalculateLux(ch0, ch1);
+           // printf("[TSL2561] Ch0: %5u, Ch1: %5u, Lux: %.2f\n\r", ch0, ch1, lux);
+        } else {
+            printf("TSL2561 Read Error!\n\r");
+        }
+
+        tx_thread_sleep(1000);  // 1 second interval
+    }
+}
+static void ld2410_thread_entry(ULONG thread_input) {
+
+    uint8_t buf[23];
+    while (1) {
+        // Read 1 byte at a time until header found
+        HAL_UART_Receive(&huart2, buf, 1, 1000);
+        if (buf[0] == 0xF4) {
+            // Read next 3 bytes to check for full header
+            HAL_UART_Receive(&huart2, buf+1, 3, 1000);
+            if (buf[1]==0xF3 && buf[2]==0xF2 && buf[3]==0xF1) {
+                // Read rest of frame
+                HAL_UART_Receive(&huart2, buf+4, LD2410_FRAME_TOTAL_LEN-4, 1000);
+                // Check for tail
+                if (buf[LD2410_FRAME_TOTAL_LEN-4]==0xF8 &&
+                    buf[LD2410_FRAME_TOTAL_LEN-3]==0xF7 &&
+                    buf[LD2410_FRAME_TOTAL_LEN-2]==0xF6 &&
+                    buf[LD2410_FRAME_TOTAL_LEN-1]==0xF5) {
+                    if (parse_ld2410_frame(buf, LD2410_FRAME_TOTAL_LEN, &room_sensor_data) == 0) {
+                       // printf("Target State: %s\n\r", ld2410_frame.target_state);
+                       // printf("Moving Target Distance: %d cm\n\r", ld2410_frame.moving_target_dist);
+                       // printf("Moving Target Energy: %d\n\r", ld2410_frame.moving_target_energy);
+                       // printf("Static Target Distance: %d cm\n\r", ld2410_frame.static_target_dist);
+                      //  printf("Static Target Energy: %d\n\r", ld2410_frame.static_target_energy);
+                       // printf("Distance: %d cm\n\r", ld2410_frame.distance);
+                      //  printf("------------------------------\n\r");
+                    }
+                }
+                tx_thread_sleep(1000);
+            }
+        }
+    }
+}
 void app_run()
 {
   const UINT isp_priority = TX_MAX_PRIORITIES / 2 - 2;
@@ -1033,6 +1186,17 @@ void app_run()
   ret = tx_thread_create(&isp_thread, "isp", isp_thread_fct, 0, isp_tread_stack,
                          sizeof(isp_tread_stack), isp_priority, isp_priority, time_slice, TX_AUTO_START);
   assert(ret == TX_SUCCESS);
+  if (TSL2561_IsConnected(&hi2c1) == true){
+	  ret = tx_thread_create(&AppTSL2561Thread, "TSL2561", App_TSL2561_Thread_Entry, 0,tsl2561_thread_stack, sizeof(tsl2561_thread_stack), 15, 15, 0, TX_AUTO_START);
+	  assert(ret == TX_SUCCESS);
+  }else{
+	  printf("TSL2561 is not connected \n\r");
+  }
+/*
+  ret = tx_thread_create(&ld2410_thread, "LD2410", ld2410_thread_entry, 0,ld2410_thread_stack, sizeof(ld2410_thread_stack),15, 15,0, TX_AUTO_START);
+  assert(ret == TX_SUCCESS);
+*/
+
   UINT status = TX_SUCCESS;
   VOID *memory_ptr;
 
@@ -1094,167 +1258,126 @@ UINT MX_NetXDuo_Init(VOID *memory_ptr)
   CHAR *pointer;
   /* Initialize the NetXDuo system. */
   nx_system_initialize();
-
-    /* Allocate the memory for packet_pool.  */
+  /* Allocate the memory for packet_pool.  */
   if (tx_byte_allocate(byte_pool, (VOID **) &pointer, NX_APP_PACKET_POOL_SIZE, TX_NO_WAIT) != TX_SUCCESS)
   {
     return TX_POOL_ERROR;
   }
-
   ret = nx_packet_pool_create(&NxAppPool, "NetXDuo App Pool", DEFAULT_PAYLOAD_SIZE, pointer, NX_APP_PACKET_POOL_SIZE);
-
   if (ret != NX_SUCCESS)
   {
     return NX_POOL_ERROR;
   }
-
-    /* Allocate the memory for Ip_Instance */
+  /* Allocate the memory for Ip_Instance */
   if (tx_byte_allocate(byte_pool, (VOID **) &pointer, Nx_IP_INSTANCE_THREAD_SIZE, TX_NO_WAIT) != TX_SUCCESS)
   {
     return TX_POOL_ERROR;
   }
-
-   /* Create the main NX_IP instance */
+  /* Create the main NX_IP instance */
   ret = nx_ip_create(&NetXDuoEthIpInstance, "NetX Ip instance", NX_APP_DEFAULT_IP_ADDRESS, NX_APP_DEFAULT_NET_MASK, &NxAppPool, nx_stm32_eth_driver,
                      pointer, Nx_IP_INSTANCE_THREAD_SIZE, NX_APP_INSTANCE_PRIORITY);
-
   if (ret != NX_SUCCESS)
   {
     return NX_NOT_SUCCESSFUL;
   }
-
-    /* Allocate the memory for ARP */
+  /* Allocate the memory for ARP */
   if (tx_byte_allocate(byte_pool, (VOID **) &pointer, DEFAULT_ARP_CACHE_SIZE, TX_NO_WAIT) != TX_SUCCESS)
   {
     return TX_POOL_ERROR;
   }
-
   ret = nx_arp_enable(&NetXDuoEthIpInstance, (VOID *)pointer, DEFAULT_ARP_CACHE_SIZE);
-
   if (ret != NX_SUCCESS)
   {
     return NX_NOT_SUCCESSFUL;
   }
   ret = nx_icmp_enable(&NetXDuoEthIpInstance);
-
   if (ret != NX_SUCCESS)
   {
     return NX_NOT_SUCCESSFUL;
   }
-
   ret = nx_tcp_enable(&NetXDuoEthIpInstance);
-
   if (ret != NX_SUCCESS)
   {
     return NX_NOT_SUCCESSFUL;
   }
-
   ret = nx_udp_enable(&NetXDuoEthIpInstance);
-
   if (ret != NX_SUCCESS)
   {
     return NX_NOT_SUCCESSFUL;
   }
   ret = nx_dhcp_create(&DHCPClient, &NetXDuoEthIpInstance, "DHCP Client");
-
   if (ret != NX_SUCCESS)
   {
       return NX_DHCP_ERROR;
   }
-
-  /* set DHCP notification callback  */
   tx_semaphore_create(&DHCPSemaphore, "DHCP Semaphore", 0);
-
-  /* Allocate the memory for main thread   */
   if (tx_byte_allocate(byte_pool, (VOID **) &pointer, NX_APP_THREAD_STACK_SIZE, TX_NO_WAIT) != TX_SUCCESS)
   {
     return TX_POOL_ERROR;
   }
-
-  /* Create the main thread */
   ret = tx_thread_create(&NxAppThread, "NetXDuo App thread", nx_app_thread_entry , 0, pointer, NX_APP_THREAD_STACK_SIZE,
                          NX_APP_THREAD_PRIORITY, NX_APP_THREAD_PRIORITY, TX_NO_TIME_SLICE, TX_AUTO_START);
-
   if (ret != TX_SUCCESS)
   {
     return TX_THREAD_ERROR;
   }
-
-  /* USER CODE BEGIN MX_NetXDuo_Init */
   printf("Nx_MQTT_Client application started..\n\r");
-
   /* Allocate the memory for SNTP client thread   */
   if (tx_byte_allocate(byte_pool, (VOID **) &pointer, SNTP_CLIENT_THREAD_MEMORY, TX_NO_WAIT) != TX_SUCCESS)
   {
     return TX_POOL_ERROR;
   }
-
   /* create the SNTP client thread */
   ret = tx_thread_create(&AppSNTPThread, "App SNTP Thread", App_SNTP_Thread_Entry, 0, pointer, SNTP_CLIENT_THREAD_MEMORY,
                          SNTP_PRIORITY, SNTP_PRIORITY, TX_NO_TIME_SLICE, TX_DONT_START);
-
   if (ret != TX_SUCCESS)
   {
     return NX_NOT_ENABLED;
   }
-
   /* Create the event flags. */
   ret = tx_event_flags_create(&SntpFlags, "SNTP event flags");
-
   /* Check for errors */
   if (ret != TX_SUCCESS)
   {
     return NX_NOT_ENABLED;
   }
-
   /* Allocate the memory for MQTT client thread   */
   if (tx_byte_allocate(byte_pool, (VOID **) &pointer, THREAD_MEMORY_SIZE, TX_NO_WAIT) != TX_SUCCESS)
   {
     return TX_POOL_ERROR;
   }
-
   /* create the MQTT client thread */
   ret = tx_thread_create(&AppMQTTClientThread, "App MQTT Thread", App_MQTT_Client_Thread_Entry, 0, pointer, THREAD_MEMORY_SIZE,
                          MQTT_PRIORITY, MQTT_PRIORITY, TX_NO_TIME_SLICE, TX_DONT_START);
-
   if (ret != TX_SUCCESS)
   {
     return NX_NOT_ENABLED;
   }
-
   /* Allocate the memory for Link thread   */
   if (tx_byte_allocate(byte_pool, (VOID **) &pointer,2 *  DEFAULT_MEMORY_SIZE, TX_NO_WAIT) != TX_SUCCESS)
   {
     return TX_POOL_ERROR;
   }
-
   /* create the Link thread */
   ret = tx_thread_create(&AppLinkThread, "App Link Thread", App_Link_Thread_Entry, 0, pointer, 2 * DEFAULT_MEMORY_SIZE,
                          LINK_PRIORITY, LINK_PRIORITY, TX_NO_TIME_SLICE, TX_AUTO_START);
-
   if (ret != TX_SUCCESS)
   {
     return NX_NOT_ENABLED;
   }
-
-
   /* Allocate the MsgQueueOne.  */
   if (tx_byte_allocate(byte_pool, (VOID **) &pointer, APP_QUEUE_SIZE*sizeof(ULONG), TX_NO_WAIT) != TX_SUCCESS)
   {
     ret = TX_POOL_ERROR;
   }
-
   /* Create the MsgQueueOne shared by MsgSenderThreadOne and MsgReceiverThread */
   if (tx_queue_create(&MsgQueueOne, "Message Queue One",TX_1_ULONG, pointer, APP_QUEUE_SIZE*sizeof(ULONG)) != TX_SUCCESS)
   {
     ret = TX_QUEUE_ERROR;
   }
-
   /* USER CODE END MX_NetXDuo_Init */
-
   return ret;
 }
-
 /**
 * @brief  ip address change callback.
 * @param ip_instance: NX_IP instance
@@ -1558,7 +1681,7 @@ static VOID App_MQTT_Client_Thread_Entry(ULONG thread_input)
   int len;
   UINT topic_length, message_length;
   UINT message_count = 0;
-  sensor_data_t sensor_data;
+  thread_com_data_t thread_com_data;
 
   /* Initialize message queue */
   ret = tx_queue_create(&measurement_queue, "Measurement Queue",
@@ -1571,23 +1694,19 @@ static VOID App_MQTT_Client_Thread_Entry(ULONG thread_input)
   /* Look up MQTT Server address. */
   ret = nx_dns_host_by_name_get(&DnsClient, (UCHAR *)MQTT_BROKER_NAME,
                                 &mqtt_server_ip.nxd_ip_address.v4, DEFAULT_TIMEOUT);
-
   /* Check status.  */
   if (ret != NX_SUCCESS)
   {
     Error_Handler();
   }
-
   /* Create MQTT client instance. */
   ret = nxd_mqtt_client_create(&MqttClient, "my_client", CLIENT_ID_STRING, STRLEN(CLIENT_ID_STRING),
                                &NetXDuoEthIpInstance, &NxAppPool, (VOID*)mqtt_client_stack, MQTT_CLIENT_STACK_SIZE,
                                MQTT_THREAD_PRIORTY, NX_NULL, 0);
-
   if (ret != NX_SUCCESS)
   {
     Error_Handler();
   }
-
   /* Register the disconnect notification function. */
   nxd_mqtt_client_disconnect_notify_set(&MqttClient, my_disconnect_func);
 
@@ -1600,7 +1719,6 @@ static VOID App_MQTT_Client_Thread_Entry(ULONG thread_input)
   {
     Error_Handler();
   }
-
   //ret = nxd_mqtt_client_secure_connect(&MqttClient, &DefaultNXDAddress, MQTT_PORT, tls_setup_callback,MQTT_KEEP_ALIVE_TIMER, CLEAN_SESSION, NX_WAIT_FOREVER);
   ret = nxd_mqtt_client_connect(&MqttClient, &mqtt_server_ip, 1883,MQTT_KEEP_ALIVE_TIMER, CLEAN_SESSION, NX_WAIT_FOREVER);
   if (ret != NX_SUCCESS)
@@ -1619,7 +1737,8 @@ static VOID App_MQTT_Client_Thread_Entry(ULONG thread_input)
   {
     Error_Handler();
   }
-  snprintf(message, sizeof(message),"{\"ts\":%lu,""\"mac\":\"%02X%02X%02X%02X%02X%02X\",""\"status\":\"start\"}",GetRtcEpoch(), MACAddr[0], MACAddr[1], MACAddr[2],MACAddr[3],MACAddr[4],MACAddr[5]);
+//  snprintf(message, sizeof(message),"{\"ts\":%lu,""\"mac\":\"%02X%02X%02X%02X%02X%02X\",""\"status\":\"start\"}",GetRtcEpoch(), MACAddr[0], MACAddr[1], MACAddr[2],MACAddr[3],MACAddr[4],MACAddr[5]);
+  snprintf(message, sizeof(message),"{\"ts\":%lu,\"mac\":\"%02X%02X%02X%02X%02X%02X\",\"nb_detect\":%i,\"event\":%i,\"lux\":%.2f,\"target_state\":%i}",GetRtcEpoch(),MACAddr[0], MACAddr[1], MACAddr[2],MACAddr[3], MACAddr[4], MACAddr[5],thread_com_data.nb_detect,thread_com_data.event,room_sensor_data.lux,room_sensor_data.target_state);
   len = 0;
   while (message[len] != '\0') {
       len++;
@@ -1635,13 +1754,13 @@ static VOID App_MQTT_Client_Thread_Entry(ULONG thread_input)
 
   while(1){
 	/* Wait for measurement data from other thread */
-	ret = tx_queue_receive(&measurement_queue, &sensor_data, TX_WAIT_FOREVER);
+	ret = tx_queue_receive(&measurement_queue, &thread_com_data, TX_WAIT_FOREVER);
 	if (ret != TX_SUCCESS) {
 	       printf("Failed to receive data from queue: %u\n", ret);
 	       continue;
 	}
 	/* Format JSON message */
-	snprintf(message, sizeof(message),"{\"ts\":%lu,\"mac\":\"%02X%02X%02X%02X%02X%02X\",\"nb_detect\":%.0f,\"state_detect\":%i}",sensor_data.timestamp,MACAddr[0], MACAddr[1], MACAddr[2],MACAddr[3], MACAddr[4], MACAddr[5],sensor_data.nb_detect,sensor_data.state_detect);
+	snprintf(message, sizeof(message),"{\"ts\":%lu,\"mac\":\"%02X%02X%02X%02X%02X%02X\",\"nb_detect\":%i,\"event\":%i,\"lux\":%.2f,\"target_state\":%i}",GetRtcEpoch(),MACAddr[0], MACAddr[1], MACAddr[2],MACAddr[3], MACAddr[4], MACAddr[5],thread_com_data.nb_detect,thread_com_data.event,room_sensor_data.lux,room_sensor_data.target_state);
     /* Publish data */
 	len = 0;
 	while (message[len] != '\0') {

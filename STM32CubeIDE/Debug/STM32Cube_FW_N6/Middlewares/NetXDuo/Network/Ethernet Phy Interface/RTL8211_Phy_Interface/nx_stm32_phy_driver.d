@@ -1,6 +1,6 @@
 STM32Cube_FW_N6/Middlewares/NetXDuo/Network/Ethernet Phy Interface/RTL8211_Phy_Interface/nx_stm32_phy_driver.o: \
  Y:/VM/stm-workspace/STM32CubeN6/Middlewares/ST/netxduo/common/drivers/ethernet/rtl8211/nx_stm32_phy_driver.c \
- Y://VM/stm-workspace/STM32CubeN6/Middlewares/ST/netxduo/common/drivers/ethernet/nx_stm32_phy_driver.h \
+ ../../STM32Cube_FW_N6/Middlewares/ST/netxduo/common/drivers/ethernet/nx_stm32_phy_driver.h \
  ../../Inc/nx_stm32_eth_config.h \
  ../../STM32Cube_FW_N6/Drivers/STM32N6xx_HAL_Driver/Inc/stm32n6xx_hal.h \
  ../../Inc/stm32n6xx_hal_conf.h \
@@ -50,7 +50,7 @@ STM32Cube_FW_N6/Middlewares/NetXDuo/Network/Ethernet Phy Interface/RTL8211_Phy_I
  ../../STM32Cube_FW_N6/Drivers/STM32N6xx_HAL_Driver/Inc/stm32n6xx_hal_uart_ex.h \
  ../../STM32Cube_FW_N6/Drivers/STM32N6xx_HAL_Driver/Inc/stm32n6xx_hal_xspi.h \
  ../../Inc/rtl8211.h
-Y://VM/stm-workspace/STM32CubeN6/Middlewares/ST/netxduo/common/drivers/ethernet/nx_stm32_phy_driver.h:
+../../STM32Cube_FW_N6/Middlewares/ST/netxduo/common/drivers/ethernet/nx_stm32_phy_driver.h:
 ../../Inc/nx_stm32_eth_config.h:
 ../../STM32Cube_FW_N6/Drivers/STM32N6xx_HAL_Driver/Inc/stm32n6xx_hal.h:
 ../../Inc/stm32n6xx_hal_conf.h:

@@ -34,40 +34,25 @@
 #include "string.h"
 #include "app_threadx.h"
 #define USE_STATIC_ALLOCATION                    1
-
 #define TX_APP_MEM_POOL_SIZE                     1024
-
 #define NX_APP_MEM_POOL_SIZE                     50*1024
 /* Private variables ---------------------------------------------------------*/
 #if (USE_STATIC_ALLOCATION == 1)
-/* USER CODE BEGIN TX_Pool_Buffer */
-/* USER CODE END TX_Pool_Buffer */
 #if defined ( __ICCARM__ )
 #pragma data_alignment=4
 #endif
-//__ALIGN_BEGIN static UCHAR tx_byte_pool_buffer[TX_APP_MEM_POOL_SIZE] __ALIGN_END;
-//static TX_BYTE_POOL tx_app_byte_pool;
-
-/* USER CODE BEGIN NX_Pool_Buffer */
 #if defined ( __ICCARM__ ) /* IAR Compiler */
 #pragma location = ".NetXPoolSection"
 #else /* GNU and AC6 compilers */
 __attribute__((section(".NetXPoolSection")))
 #endif
-/* USER CODE END NX_Pool_Buffer */
 #if defined ( __ICCARM__ )
 #pragma data_alignment=4
 #endif
-/*__ALIGN_BEGIN static UCHAR nx_byte_pool_buffer[NX_APP_MEM_POOL_SIZE] __ALIGN_END;
-static TX_BYTE_POOL nx_app_byte_pool;
-*/
 #endif
-/* USER CODE BEGIN Includes */
 #if defined(__ICCARM__)
 #include <LowLevelIOInterface.h>
 #endif /* __ICCARM__ */
-/* USER CODE END Includes */
-/* USER CODE BEGIN PD */
 #if defined(__ICCARM__)
 /* New definition from EWARM V9, compatible with EWARM8 */
 int iar_fputc(int ch);
@@ -78,13 +63,11 @@ int iar_fputc(int ch);
 #elif defined(__GNUC__)
 #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
 #endif /* __ICCARM__ */
-/* USER CODE END PD */
-
+#include "string.h"
+#include "app_threadx.h"
 UART_HandleTypeDef huart1;
-
 static TX_THREAD main_thread;
 static uint8_t main_tread_stack[4096];
-
 static void SystemClock_Config(void);
 static void NPURam_enable();
 static void NPUCache_config();
@@ -93,7 +76,7 @@ static void IAC_Config();
 static void CONSOLE_Config(void);
 static int main_threadx(void);
 static void main_thread_fct(ULONG arg);
-/* Private variables ---------------------------------------------------------*/
+
 #ifndef ETH_DMA_RX_CH_CNT
 #define ETH_DMA_RX_CH_CNT         2U
 #endif /* ETH_DMA_RX_CH_CNT */
@@ -106,8 +89,6 @@ static void main_thread_fct(ULONG arg);
 #ifndef ETH_TX_DESC_CNT
 #define ETH_TX_DESC_CNT         4U
 #endif /* ETH_TX_DESC_CNT */
-
-
 #if defined ( __ICCARM__ ) /*!< IAR Compiler */
 #pragma location=0x341EBE80
 ETH_DMADescTypeDef  DMARxDscrTab[ETH_DMA_RX_CH_CNT][ETH_RX_DESC_CNT]; /* Ethernet Rx DMA Descriptors */
@@ -120,20 +101,20 @@ __attribute__((at(0x341EBF40))) ETH_DMADescTypeDef  DMATxDscrTab[ETH_DMA_TX_CH_C
 ETH_DMADescTypeDef DMARxDscrTab[ETH_DMA_RX_CH_CNT][ETH_RX_DESC_CNT] __attribute__((section(".RxDecripSection"))); /* Ethernet Rx DMA Descriptors */
 ETH_DMADescTypeDef DMATxDscrTab[ETH_DMA_TX_CH_CNT][ETH_TX_DESC_CNT] __attribute__((section(".TxDecripSection")));   /* Ethernet Tx DMA Descriptors */
 #endif
-/**
-  * @brief  Main program
-  * @param  None
-  * @retval None
-  */
-
 ETH_HandleTypeDef heth;
 RNG_HandleTypeDef hrng;
+I2C_HandleTypeDef hi2c1;
+UART_HandleTypeDef huart2;
+
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_ETH_Init(void);
 static void MX_RNG_Init(void);
 static void MX_RTC_Init(void);
 static void RISAF_Config(void);
+static void MX_I2C1_Init2(void);
+static void MX_USART2_UART_Init(void);
+
 void MPU_Config(void);
 void Success_Handler(void)
 {
@@ -145,35 +126,34 @@ void Success_Handler(void)
    }
 }
 
-/**
-  * @brief  Main program
-  * @param  None
-  * @retval None
-  */
 int main(void)
 {
   /* Power on ICACHE */
   MEMSYSCTL->MSCR |= MEMSYSCTL_MSCR_ICACTIVE_Msk;
-
   /* Set back system and CPU clock source to HSI */
   __HAL_RCC_CPUCLK_CONFIG(RCC_CPUCLKSOURCE_HSI);
   __HAL_RCC_SYSCLK_CONFIG(RCC_SYSCLKSOURCE_HSI);
   MPU_Config();
-  /* Power settings */
+  SCB_EnableICache();
+  SCB_EnableDCache();
   HAL_PWREx_EnableVddIO2();
   HAL_Init();
+  SystemClock_Config();
+  RISAF_Config();
+  MX_GPIO_Init();
+  MX_ETH_Init();
+  MX_RNG_Init();
+  MX_RTC_Init();
+  MX_I2C1_Init2();
+  MX_USART2_UART_Init();
 
+  MX_ThreadX_Init();
   SCB_EnableICache();
 #if defined(USE_DCACHE)
   /* Power on DCACHE */
   MEMSYSCTL->MSCR |= MEMSYSCTL_MSCR_DCACTIVE_Msk;
   SCB_EnableDCache();
 #endif
-  MX_GPIO_Init();
-  MX_ETH_Init();
-  MX_RNG_Init();
-  MX_RTC_Init();
-  MX_ThreadX_Init();
   return main_threadx();
 }
 
@@ -486,6 +466,29 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(LED_RED_GPIO_Port, &GPIO_InitStruct);
+  /* I2C1 GPIO Configuration */
+  GPIO_InitStruct.Pin = GPIO_PIN_9 | GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF4_I2C1; // PH9/PC1 use AF4
+  HAL_GPIO_Init(GPIOH, &GPIO_InitStruct); // PH9 (SCL)
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct); // PC1 (SDA)
+  // Configure PD5 as USART2 TX
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  // Configure PF6 as USART2 RX
+  GPIO_InitStruct.Pin = GPIO_PIN_6;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 }
 
 static int main_threadx()
@@ -708,4 +711,65 @@ void assert_failed(uint8_t* file, uint32_t line)
 __attribute__ ((section (".keep_me"))) void app_clean_invalidate_dbg()
 {
   SCB_CleanInvalidateDCache();
+}
+static void MX_I2C1_Init2(void)
+{
+  hi2c1.Instance = I2C1;
+  hi2c1.Init.Timing = 0x30C0EDFF;
+  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c1.Init.OwnAddress2 = 0;
+  hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+/**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART2_UART_Init(void)
+{
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 256000;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart2.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+  huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetTxFifoThreshold(&huart2, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetRxFifoThreshold(&huart2, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_DisableFifoMode(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }

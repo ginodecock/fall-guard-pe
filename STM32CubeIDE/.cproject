@@ -132,17 +132,17 @@
 									<listOptionValue builtIn="false" value="../../STM32Cube_FW_N6/Middlewares/ST/threadx/common/inc"/>
 									<listOptionValue builtIn="false" value="../../STM32Cube_FW_N6/Middlewares/ST/threadx/ports/cortex_m55/gnu/inc"/>
 									<listOptionValue builtIn="false" value="../../STM32Cube_FW_N6/Middlewares/ST/threadx/utility/execution_profile_kit"/>
-									<listOptionValue builtIn="false" value="Y://VM/stm-workspace/STM32CubeN6/Middlewares/ST/netxduo/common/drivers/ethernet"/>
-									<listOptionValue builtIn="false" value="Y://VM/stm-workspace/STM32CubeN6/Middlewares/ST/netxduo/nx_secure/inc"/>
-									<listOptionValue builtIn="false" value="Y://VM/stm-workspace/STM32CubeN6/Middlewares/ST/netxduo/nx_secure/ports"/>
-									<listOptionValue builtIn="false" value="Y://VM/stm-workspace/STM32CubeN6/Middlewares/ST/netxduo/crypto_libraries/inc"/>
-									<listOptionValue builtIn="false" value="Y://VM/stm-workspace/STM32CubeN6/Middlewares/ST/netxduo/tsn/inc"/>
-									<listOptionValue builtIn="false" value="Y://VM/stm-workspace/STM32CubeN6/Middlewares/ST/netxduo/addons/mqtt"/>
-									<listOptionValue builtIn="false" value="Y://VM/stm-workspace/STM32CubeN6/Middlewares/ST/netxduo/addons/dhcp"/>
-									<listOptionValue builtIn="false" value="Y://VM/stm-workspace/STM32CubeN6/Middlewares/ST/netxduo/addons/sntp"/>
-									<listOptionValue builtIn="false" value="Y://VM/stm-workspace/STM32CubeN6/Middlewares/ST/netxduo/addons/dns"/>
-									<listOptionValue builtIn="false" value="Y://VM/stm-workspace/STM32CubeN6/Middlewares/ST/netxduo/common/inc"/>
-									<listOptionValue builtIn="false" value="Y://VM/stm-workspace/STM32CubeN6/Middlewares/ST/netxduo/ports/cortex_m55/gnu/inc"/>
+									<listOptionValue builtIn="false" value="../../STM32Cube_FW_N6/Middlewares/ST/netxduo/common/drivers/ethernet"/>
+									<listOptionValue builtIn="false" value="../../STM32Cube_FW_N6/Middlewares/ST/netxduo/nx_secure/inc"/>
+									<listOptionValue builtIn="false" value="../../STM32Cube_FW_N6/Middlewares/ST/netxduo/nx_secure/ports"/>
+									<listOptionValue builtIn="false" value="../../STM32Cube_FW_N6/Middlewares/ST/netxduo/crypto_libraries/inc"/>
+									<listOptionValue builtIn="false" value="../../STM32Cube_FW_N6/Middlewares/ST/netxduo/tsn/inc"/>
+									<listOptionValue builtIn="false" value="../../STM32Cube_FW_N6/Middlewares/ST/netxduo/addons/mqtt"/>
+									<listOptionValue builtIn="false" value="../../STM32Cube_FW_N6/Middlewares/ST/netxduo/addons/dhcp"/>
+									<listOptionValue builtIn="false" value="../../STM32Cube_FW_N6/Middlewares/ST/netxduo/addons/sntp"/>
+									<listOptionValue builtIn="false" value="../../STM32Cube_FW_N6/Middlewares/ST/netxduo/addons/dns"/>
+									<listOptionValue builtIn="false" value="../../STM32Cube_FW_N6/Middlewares/ST/netxduo/common/inc"/>
+									<listOptionValue builtIn="false" value="../../STM32Cube_FW_N6/Middlewares/ST/netxduo/ports/cortex_m55/gnu/inc"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.otherflags.315856049" name="Other flags" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.otherflags" useByScannerDiscovery="true" valueType="stringList">
 									<listOptionValue builtIn="false" value=""/>

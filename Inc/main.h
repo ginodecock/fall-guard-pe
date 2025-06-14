@@ -37,6 +37,10 @@ void Success_Handler(void);
 #define USART1_TX_PIN GPIO_PIN_5
 #define USART1_RX_PIN GPIO_PIN_6
 #define USART1_PORT GPIOE
+#define I2C1_SDA_Pin GPIO_PIN_1
+#define I2C1_SDA_GPIO_Port GPIOC
+#define I2C1_SCL_Pin GPIO_PIN_9
+#define I2C1_SCL_GPIO_Port GPIOH
 
 #endif /* MAIN_H */
 
