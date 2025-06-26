@@ -884,7 +884,20 @@ static void Display_NetworkOutput(display_info_t *info)
                	     	 tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
                	     	 prev_state_detect = 13;
                	     }
+                  }
+                  else {
+                     UTIL_LCDEx_PrintfAt(0, 10, LEFT_MODE, "Normal");
+                	 /* Send to MQTT thread */
+                	 if (fg_state.fallen == FALLEN_FALL){
+                    	 printf("Normal\n\r");
+                    	 /* Allocate the memory for MQTT client thread   */
+                    	 thread_com_data.nb_detect = nb_rois;
+                    	 thread_com_data.event = 1; //Fall detected!
 
+                		 fg_state.fallen = FALLEN_NORMAL;
+                	  	 tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
+                	  	 prev_state_detect = 13;
+                	 }
                   }
               }
           }
