@@ -119,6 +119,36 @@ typedef struct {
 static environment_sensor_data_t room_sensor_data;
 static uint32_t static_start_time = 0;  // Track start of state 2
 static bool static_triggered = false;   // Prevent duplicate events
+// State enumerations
+typedef enum {
+    FALLEN_NORMAL,
+    FALLEN_FALL
+} fallen_state_t;
+
+typedef enum {
+    MOVEMENT_FREEZE,
+    MOVEMENT_MOVE,
+    MOVEMENT_NO_ONE
+} movement_state_t;
+
+typedef enum {
+    LUMINANCE_DARK,
+    LUMINANCE_LIGHT
+} luminance_state_t;
+
+// Combined state structure
+typedef struct {
+    fallen_state_t fallen;
+    movement_state_t movement;
+    luminance_state_t luminance;
+} system_state_t;
+
+// Global Fall Guard state variable (volatile for ISR safety)
+volatile system_state_t fg_state = {
+    .fallen = FALLEN_NORMAL,
+    .movement = MOVEMENT_NO_ONE,
+    .luminance = LUMINANCE_LIGHT
+};
 
 TX_EVENT_FLAGS_GROUP     SntpFlags;
 
@@ -712,50 +742,34 @@ static void Display_NetworkOutput(display_info_t *info)
   /* cpu load */
   cpuload_update(&cpu_load);
   cpuload_get_info(&cpu_load, NULL, &cpu_load_one_second, NULL);
-  if ((GetRtcEpoch() - prev_timestamp) > 3)
-    {
-  	  prev_timestamp = GetRtcEpoch();
-        if (nb_rois != prev_nb_person){
-  	     printf("persons detected = %lu\n\r",nb_rois);
-         prev_nb_person = nb_rois;
-         thread_com_data.nb_detect = (int)prev_nb_person;
-         thread_com_data.event = 1; //Normal person state
-  	     prev_state_detect = 1;
-
-  	     /* Send to MQTT thread */
-  	     tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
-  	  //tx_thread_sleep(1000);  // Adjust sampling rate as needed
-  	  }
-      if (room_sensor_data.target_state != prev_target_state){
-      	 printf("Room change detected = %d\n\r",room_sensor_data.target_state);
-       	 prev_target_state = room_sensor_data.target_state;
-       	 thread_com_data.nb_detect = (int)nb_rois;
-       	 thread_com_data.event = 2; //Room change detection
-
-         /* Send to MQTT thread */
-         tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
-      }
-    }
+  //room data
   if (room_sensor_data.target_state == 2){
      if (static_start_time == 0){
         // First detection of state 2 - record start time
         static_start_time = HAL_GetTick();
         static_triggered = false;
      }else if (!static_triggered &&
-        (HAL_GetTick() - static_start_time >= 20000)) {
+        (HAL_GetTick() - static_start_time >= MOVEMENT_FREEZE_TIME)) {
         // Static maintained for 20 seconds
         thread_com_data.nb_detect = (int)nb_rois;
         thread_com_data.event = 14;  // New event type
-
+        fg_state.movement = MOVEMENT_FREEZE;
         if (tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT) == TX_SUCCESS) {
              static_triggered = true;  // Prevent retriggering
              printf("State 2 maintained for 20 seconds - Event 14 sent\n\r");
+
         }
      }
   }else{
      // Reset if state changes from 2
      static_start_time = 0;
      static_triggered = false;
+  }
+  if (room_sensor_data.target_state == 0){
+	  fg_state.movement = MOVEMENT_NO_ONE;
+  }
+  if (room_sensor_data.target_state == 1 || room_sensor_data.target_state == 3){
+	  fg_state.movement = MOVEMENT_MOVE;
   }
 
   // ... existing room state change detection ...
@@ -766,6 +780,30 @@ static void Display_NetworkOutput(display_info_t *info)
      static_start_time = 0;
      static_triggered = false;
   }
+  //Object data
+  if ((GetRtcEpoch() - prev_timestamp) > 3)
+    {
+  	  prev_timestamp = GetRtcEpoch();
+      if (nb_rois != prev_nb_person && (room_sensor_data.target_state == 1 || room_sensor_data.target_state == 2 || room_sensor_data.target_state == 3)){ //change detected and there must be a person. If not it's a false positive
+  	     printf("persons detected = %lu\n\r",nb_rois);
+         prev_nb_person = nb_rois;
+  	     thread_com_data.nb_detect = (int)prev_nb_person;
+  	     thread_com_data.event = 1; //Normal person state
+  	     prev_state_detect = 1;
+
+  	     /* Send to MQTT thread */
+  	     tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
+  	  }
+      if (room_sensor_data.target_state != prev_target_state){
+    	 printf("Room change detected = %d\n\r",room_sensor_data.target_state);
+    	 prev_target_state = room_sensor_data.target_state;
+    	 thread_com_data.nb_detect = (int)nb_rois;
+    	 thread_com_data.event = 2; //Room change detection
+
+  	     /* Send to MQTT thread */
+  	     tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
+      }
+    }
   nn_fps = 1000.0 / info->nn_period_ms;
 
 #if 1
@@ -840,6 +878,7 @@ static void Display_NetworkOutput(display_info_t *info)
                	     /* Allocate the memory for MQTT client thread   */
                	     thread_com_data.nb_detect = nb_rois;
                	     thread_com_data.event = 13; //Fall detected!
+               	     fg_state.fallen = FALLEN_FALL;
                	     /* Send to MQTT thread */
                	     if (prev_state_detect != 13){
                	     	 tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
@@ -1136,11 +1175,25 @@ static VOID App_TSL2561_Thread_Entry(ULONG thread_input) {
         if (TSL2561_ReadData(&hi2c1, &ch0, &ch1) == HAL_OK) {
         	room_sensor_data.lux = TSL2561_CalculateLux(ch0, ch1);
            // printf("[TSL2561] Ch0: %5u, Ch1: %5u, Lux: %.2f\n\r", ch0, ch1, lux);
+
+        	if (fg_state.luminance == LUMINANCE_DARK) {
+        	   // Only transition to LIGHT when exceeding upper threshold
+        	   if (room_sensor_data.lux > LUMINANCE_UPPER_THRESH) {
+        	        fg_state.luminance = LUMINANCE_LIGHT;
+        	        //printf("LUMINANCE_LIGHT\n\r");
+        	   }
+        	} else {
+        	   // Only transition to DARK when falling below lower threshold
+        	   if (room_sensor_data.lux < LUMINANCE_LOWER_THRESH) {
+        	        fg_state.luminance = LUMINANCE_DARK;
+        	        //printf("LUMINANCE_DARK\n\r");
+        	   }
+        	}
         } else {
             printf("TSL2561 Read Error!\n\r");
         }
 
-        tx_thread_sleep(1000);  // 1 second interval
+        tx_thread_sleep(1000);  //timing of 10 pulses minus 1 period
     }
 }
 static void ld2410_thread_entry(ULONG thread_input) {
@@ -1148,13 +1201,13 @@ static void ld2410_thread_entry(ULONG thread_input) {
     uint8_t buf[23];
     while (1) {
         // Read 1 byte at a time until header found
-        HAL_UART_Receive(&huart2, buf, 1, 1000);
+        HAL_UART_Receive(&huart2, buf, 1, 10);
         if (buf[0] == 0xF4) {
             // Read next 3 bytes to check for full header
-            HAL_UART_Receive(&huart2, buf+1, 3, 1000);
+            HAL_UART_Receive(&huart2, buf+1, 3, 10);
             if (buf[1]==0xF3 && buf[2]==0xF2 && buf[3]==0xF1) {
                 // Read rest of frame
-                HAL_UART_Receive(&huart2, buf+4, LD2410_FRAME_TOTAL_LEN-4, 1000);
+                HAL_UART_Receive(&huart2, buf+4, LD2410_FRAME_TOTAL_LEN-4, 10);
                 // Check for tail
                 if (buf[LD2410_FRAME_TOTAL_LEN-4]==0xF8 &&
                     buf[LD2410_FRAME_TOTAL_LEN-3]==0xF7 &&
@@ -1170,7 +1223,7 @@ static void ld2410_thread_entry(ULONG thread_input) {
                       //  printf("------------------------------\n\r");
                     }
                 }
-                tx_thread_sleep(993);//timing of 10 pulses minus 1 period
+                tx_thread_sleep(994);//timing of 10 pulses minus 1 period
             }
         }
     }
@@ -1783,8 +1836,20 @@ static VOID App_MQTT_Client_Thread_Entry(ULONG thread_input)
   {
     Error_Handler();
   }
+  char* fallen_str = (fg_state.fallen == FALLEN_FALL) ? "fall" : "normal";
+  char* luminance_str = (fg_state.luminance == LUMINANCE_DARK) ? "dark" : "light";
+
+  char* movement_str;
+  switch(fg_state.movement) {
+      case MOVEMENT_FREEZE: movement_str = "freeze"; break;
+      case MOVEMENT_MOVE: movement_str = "move"; break;
+      default: movement_str = "no_one"; break;
+  }
+
 //  snprintf(message, sizeof(message),"{\"ts\":%lu,""\"mac\":\"%02X%02X%02X%02X%02X%02X\",""\"status\":\"start\"}",GetRtcEpoch(), MACAddr[0], MACAddr[1], MACAddr[2],MACAddr[3],MACAddr[4],MACAddr[5]);
-  snprintf(message, sizeof(message),"{\"ts\":%lu,\"mac\":\"%02X%02X%02X%02X%02X%02X\",\"nb_detect\":%i,\"event\":%i,\"lux\":%.2f,\"target_state\":%i}",GetRtcEpoch(),MACAddr[0], MACAddr[1], MACAddr[2],MACAddr[3], MACAddr[4], MACAddr[5],thread_com_data.nb_detect,thread_com_data.event,room_sensor_data.lux,room_sensor_data.target_state);
+ // snprintf(message, sizeof(message),"{\"ts\":%lu,\"mac\":\"%02X%02X%02X%02X%02X%02X\",\"nb_detect\":%i,\"event\":%i,\"lux\":%.2f,\"target_state\":%i}",GetRtcEpoch(),MACAddr[0], MACAddr[1], MACAddr[2],MACAddr[3], MACAddr[4], MACAddr[5],thread_com_data.nb_detect,thread_com_data.event,room_sensor_data.lux,room_sensor_data.target_state);
+  snprintf(message, sizeof(message),"{\"ts\":%lu,\"mac\":\"%02X%02X%02X%02X%02X%02X\",\"nb_detect\":%i,\"event\":%i,\"lux\":%.2f,\"sfal\":\"%s\",\"smov\":\"%s\",\"slum\":\"%s\"}",GetRtcEpoch(),MACAddr[0], MACAddr[1], MACAddr[2],MACAddr[3], MACAddr[4], MACAddr[5],thread_com_data.nb_detect,thread_com_data.event,room_sensor_data.lux,fallen_str, movement_str, luminance_str);
+
   len = 0;
   while (message[len] != '\0') {
       len++;
@@ -1805,8 +1870,18 @@ static VOID App_MQTT_Client_Thread_Entry(ULONG thread_input)
 	       printf("Failed to receive data from queue: %u\n", ret);
 	       continue;
 	}
+	fallen_str = (fg_state.fallen == FALLEN_FALL) ? "fall" : "normal";
+	luminance_str = (fg_state.luminance == LUMINANCE_DARK) ? "dark" : "light";
+
+	switch(fg_state.movement) {
+	      case MOVEMENT_FREEZE: movement_str = "freeze"; break;
+	      case MOVEMENT_MOVE: movement_str = "move"; break;
+	      default: movement_str = "no_one"; break;
+	}
+
 	/* Format JSON message */
-	snprintf(message, sizeof(message),"{\"ts\":%lu,\"mac\":\"%02X%02X%02X%02X%02X%02X\",\"nb_detect\":%i,\"event\":%i,\"lux\":%.2f,\"target_state\":%i}",GetRtcEpoch(),MACAddr[0], MACAddr[1], MACAddr[2],MACAddr[3], MACAddr[4], MACAddr[5],thread_com_data.nb_detect,thread_com_data.event,room_sensor_data.lux,room_sensor_data.target_state);
+	//snprintf(message, sizeof(message),"{\"ts\":%lu,\"mac\":\"%02X%02X%02X%02X%02X%02X\",\"nb_detect\":%i,\"event\":%i,\"lux\":%.2f,\"target_state\":%i}",GetRtcEpoch(),MACAddr[0], MACAddr[1], MACAddr[2],MACAddr[3], MACAddr[4], MACAddr[5],thread_com_data.nb_detect,thread_com_data.event,room_sensor_data.lux,room_sensor_data.target_state);
+	snprintf(message, sizeof(message),"{\"ts\":%lu,\"mac\":\"%02X%02X%02X%02X%02X%02X\",\"nb_detect\":%i,\"event\":%i,\"lux\":%.2f,\"sfal\":\"%s\",\"smov\":\"%s\",\"slum\":\"%s\"}",GetRtcEpoch(),MACAddr[0], MACAddr[1], MACAddr[2],MACAddr[3], MACAddr[4], MACAddr[5],thread_com_data.nb_detect,thread_com_data.event,room_sensor_data.lux,fallen_str, movement_str, luminance_str);
     /* Publish data */
 	len = 0;
 	while (message[len] != '\0') {
