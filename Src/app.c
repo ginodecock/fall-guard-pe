@@ -396,7 +396,7 @@ int parse_ld2410_frame(const uint8_t *frame, size_t len, environment_sensor_data
     // Data fields
     const uint8_t *target_data = frame + 8; // skip header, len, type, head
     if (len < 8 + 9 + 6) return -4; // ensure enough data
-
+    if (target_data[0] > 3) return -5; //disregard unknown state
     // Parse target state
     /*switch (target_data[0]) {
         case 0x00: strcpy(out->target_state, "no_one"); break;
@@ -717,9 +717,15 @@ static void Display_Detection(mpe_pp_outBuffer_t *detect)
   y1 = yc + (h + 1) / 2;
   clamp_point(&x0, &y0);
   clamp_point(&x1, &y1);
+  if (fg_state.fallen == FALLEN_FALL){
+	  UTIL_LCD_DrawRect(x0, y0, x1 - x0, y1 - y0, UTIL_LCD_COLOR_RED);
+	  UTIL_LCDEx_PrintfAt(x0, y0, LEFT_MODE, "Fall!");
+  }else{
+	  UTIL_LCD_DrawRect(x0, y0, x1 - x0, y1 - y0, UTIL_LCD_COLOR_GREEN);
+	  UTIL_LCDEx_PrintfAt(x0, y0, LEFT_MODE, classes_table[detect->class_index]);
+  }
 
-  UTIL_LCD_DrawRect(x0, y0, x1 - x0, y1 - y0, colors[detect->class_index % NUMBER_COLORS]);
-  UTIL_LCDEx_PrintfAt(x0, y0, LEFT_MODE, classes_table[detect->class_index]);
+  //UTIL_LCDEx_PrintfAt(x0, y0, LEFT_MODE, classes_table[detect->class_index]);
 
   for (i = 0; i < ARRAY_NB(bindings); i++)
     Display_binding(&detect->pKeyPoints[bindings[i][0]], &detect->pKeyPoints[bindings[i][1]], bindings[i][2]);
@@ -862,18 +868,18 @@ static void Display_NetworkOutput(display_info_t *info)
                   convert_point(hist_nose.x, hist_nose.y, &x_hist, &y_hist);
 
                   // Calculate motion vector
-                  float dx = x_curr - x_hist;
+                 // float dx = x_curr - x_hist;
                   float dy = y_curr - y_hist;
-                  float length = sqrtf(dx*dx + dy*dy);
+                  //float length = sqrtf(dx*dx + dy*dy);
 
                   // Display vector length
-                  int box_x0 = (int)(lcd_bg_area.XSize * (info->detects[i].x_center - info->detects[i].width/2));
-                  int box_y0 = (int)(lcd_bg_area.YSize * (info->detects[i].y_center - info->detects[i].height/2));
-                  UTIL_LCDEx_PrintfAt(box_x0, box_y0 - 20, LEFT_MODE, "%.0fpx", length);
+                 // int box_x0 = (int)(lcd_bg_area.XSize * (info->detects[i].x_center - info->detects[i].width/2));
+                 // int box_y0 = (int)(lcd_bg_area.YSize * (info->detects[i].y_center - info->detects[i].height/2));
+                 // UTIL_LCDEx_PrintfAt(box_x0, box_y0 - 20, LEFT_MODE, "%.0fpx", length);
 
                   // Fall detection (vertical movement >10px over 10 frames)
                   if(dy > 80) {
-                     UTIL_LCDEx_PrintfAt(0, 10, LEFT_MODE, "Fall detected!");
+                     //UTIL_LCDEx_PrintfAt(0, 200, LEFT_MODE, "Fall detected!");
                	     printf("Fall detected!\n\r");
                	     /* Allocate the memory for MQTT client thread   */
                	     thread_com_data.nb_detect = nb_rois;
@@ -886,7 +892,7 @@ static void Display_NetworkOutput(display_info_t *info)
                	     }
                   }
                   else {
-                     UTIL_LCDEx_PrintfAt(0, 10, LEFT_MODE, "Normal");
+                    // UTIL_LCDEx_PrintfAt(0, 200, LEFT_MODE, "Normal");
                 	 /* Send to MQTT thread */
                 	 if (fg_state.fallen == FALLEN_FALL){
                     	 printf("Normal\n\r");
