@@ -149,7 +149,11 @@ volatile system_state_t fg_state = {
     .movement = MOVEMENT_NO_ONE,
     .luminance = LUMINANCE_LIGHT
 };
-
+volatile system_state_t prev_fg_state = {
+    .fallen = FALLEN_NORMAL,
+    .movement = MOVEMENT_NO_ONE,
+    .luminance = LUMINANCE_LIGHT
+};
 TX_EVENT_FLAGS_GROUP     SntpFlags;
 
 ULONG mqtt_client_stack[MQTT_CLIENT_STACK_SIZE];
@@ -786,7 +790,7 @@ static void Display_NetworkOutput(display_info_t *info)
      static_start_time = 0;
      static_triggered = false;
   }
-  //Object data
+  //Object data and target state
   if ((GetRtcEpoch() - prev_timestamp) > 3)
     {
   	  prev_timestamp = GetRtcEpoch();
@@ -800,9 +804,10 @@ static void Display_NetworkOutput(display_info_t *info)
   	     /* Send to MQTT thread */
   	     tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
   	  }
-      if (room_sensor_data.target_state != prev_target_state){
+      if ((room_sensor_data.target_state != prev_target_state) && (fg_state.movement != prev_fg_state.movement)){   //only report room state changes
     	 printf("Room change detected = %d\n\r",room_sensor_data.target_state);
     	 prev_target_state = room_sensor_data.target_state;
+    	 prev_fg_state.movement = fg_state.movement;
     	 thread_com_data.nb_detect = (int)nb_rois;
     	 thread_com_data.event = 2; //Room change detection
 
@@ -908,7 +913,6 @@ static void Display_NetworkOutput(display_info_t *info)
               }
           }
       }
-
   /* Draw bounding boxes */
   for (i = 0; i < nb_rois; i++)
     Display_Detection(&rois[i]);
