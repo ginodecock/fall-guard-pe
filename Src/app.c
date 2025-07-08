@@ -756,25 +756,36 @@ static void Display_NetworkOutput(display_info_t *info)
   if (room_sensor_data.target_state == 2){
      if (static_start_time == 0){
         // First detection of state 2 - record start time
-        static_start_time = HAL_GetTick();
+        static_start_time = GetRtcEpoch();
         static_triggered = false;
-     }else if (!static_triggered &&
-        (HAL_GetTick() - static_start_time >= MOVEMENT_FREEZE_TIME)) {
+        //printf(" state 2 , %lu , %lu\n\r",static_start_time, GetRtcEpoch() - static_start_time);
+     }else if (!static_triggered && (GetRtcEpoch() - static_start_time >= MOVEMENT_FREEZE_TIME)) {
         // Static maintained for 20 seconds
+    	//printf(" Static maintained for 20 seconds\n\r");
         thread_com_data.nb_detect = (int)nb_rois;
         thread_com_data.event = 14;  // New event type
         fg_state.movement = MOVEMENT_FREEZE;
         if (tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT) == TX_SUCCESS) {
              static_triggered = true;  // Prevent retriggering
-             printf("State 2 maintained for 20 seconds - Event 14 sent\n\r");
+             printf("State 2 maintained for 30 seconds - Event 14 sent\n\r");
 
         }
      }
   }else{
      // Reset if state changes from 2
+	 // printf(" Reset if state changes from 2\n\r");
+	 //printf(" state %lu\n\r",room_sensor_data.target_state);
      static_start_time = 0;
      static_triggered = false;
   }
+  // ... existing room state change detection ...//
+//  if (room_sensor_data.target_state != prev_target_state) {
+     // ... existing room change handling ...
+
+//     printf("Reset state-2 timer on any state change\n\r");
+//     static_start_time = 0;
+//     static_triggered = false;
+//  }
   if (room_sensor_data.target_state == 0){
 	  fg_state.movement = MOVEMENT_NO_ONE;
   }
@@ -782,14 +793,6 @@ static void Display_NetworkOutput(display_info_t *info)
 	  fg_state.movement = MOVEMENT_MOVE;
   }
 
-  // ... existing room state change detection ...
-  if (room_sensor_data.target_state != prev_target_state) {
-     // ... existing room change handling ...
-
-     // Reset state-2 timer on any state change
-     static_start_time = 0;
-     static_triggered = false;
-  }
   //Object data and target state
   if ((GetRtcEpoch() - prev_timestamp) > 3)
     {
@@ -804,17 +807,17 @@ static void Display_NetworkOutput(display_info_t *info)
   	     /* Send to MQTT thread */
   	     tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
   	  }
-      if ((room_sensor_data.target_state != prev_target_state) && (fg_state.movement != prev_fg_state.movement)){   //only report room state changes
-    	 printf("Room change detected = %d\n\r",room_sensor_data.target_state);
-    	 prev_target_state = room_sensor_data.target_state;
-    	 prev_fg_state.movement = fg_state.movement;
-    	 thread_com_data.nb_detect = (int)nb_rois;
-    	 thread_com_data.event = 2; //Room change detection
-
-  	     /* Send to MQTT thread */
-  	     tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
-      }
     }
+  if (fg_state.movement != prev_fg_state.movement){   //only report room state changes
+	 printf("Room change detected = %d\n\r",room_sensor_data.target_state);
+	 //prev_target_state = room_sensor_data.target_state;
+	 prev_fg_state.movement = fg_state.movement;
+	 thread_com_data.nb_detect = (int)nb_rois;
+	 thread_com_data.event = 2; //Room change detection
+
+	 /* Send to MQTT thread */
+	 tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
+  }
   nn_fps = 1000.0 / info->nn_period_ms;
 
 #if 1

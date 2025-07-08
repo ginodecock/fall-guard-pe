@@ -25,7 +25,7 @@
 //Fall Guard settings
 #define LUMINANCE_UPPER_THRESH      0.35f  // Transition to LIGHT
 #define LUMINANCE_LOWER_THRESH      0.25f  // Transition to DARK
-#define MOVEMENT_FREEZE_TIME        30000  //Time to determine a Freeze ms
+#define MOVEMENT_FREEZE_TIME        30  //Time to determine a Freeze ms
 #define FALLEN_TIME                 7      //Time to determine a fall using edge AI
 
 
