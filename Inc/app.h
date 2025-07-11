@@ -26,8 +26,11 @@
 #define LUMINANCE_UPPER_THRESH      0.35f  // Transition to LIGHT
 #define LUMINANCE_LOWER_THRESH      0.25f  // Transition to DARK
 #define MOVEMENT_FREEZE_TIME        30  //Time to determine a Freeze ms
-#define FALLEN_TIME                 7      //Time to determine a fall using edge AI
-
+#define KP_CONF_THRESH     (0.45f)
+#define REGIONS_NB         5
+#define FLAT_DELTA_PX      30      // vertical tolerance δ
+#define WINDOW_FRAMES      6       // N consecutive frames 7 seconds
+#define FALL_RECOVERY_LOCKOUT_SEC 60
 
 #define MOSQUITTO_CERT_FILE         "mosquitto.cert.h"
 

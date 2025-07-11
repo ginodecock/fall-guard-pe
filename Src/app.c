@@ -40,6 +40,7 @@
 #include "nx_stm32_eth_driver.h"
 #include "stm32n6xx.h"
 #include "app_threadx.h"
+#include "time.h"
 #define USE_STATIC_ALLOCATION                    1
 #define TX_APP_MEM_POOL_SIZE                     1024
 #define NX_APP_MEM_POOL_SIZE                     50*1024
@@ -156,13 +157,7 @@ volatile system_state_t prev_fg_state = {
     .luminance = LUMINANCE_LIGHT
 };
 
-// Fall-detection parameters (add near top of file)
-#define KP_CONF_THRESH     (0.45f)
-#define REGIONS_NB         5
-#define FLAT_DELTA_PX      30      // vertical tolerance δ
-#define WINDOW_FRAMES      6       // N consecutive frames
-// Remove FLAT_ASPECT_BETA - no longer needed
-
+static uint32_t last_fall_time[AI_MPE_YOLOV8_PP_MAX_BOXES_LIMIT] = {0};
 typedef enum {
     REGION_HEAD, REGION_SHOULDER, REGION_HIP, REGION_KNEE, REGION_ANKLE
 } body_region_t;
@@ -733,6 +728,41 @@ static void Display_binding(mpe_pp_keyPoints_t *from, mpe_pp_keyPoints_t *to, ui
     }
   }
 }
+// Returns true if the pair is a left/right horizontal pair
+static bool is_horizontal_keypoint_pair(int k1, int k2) {
+    // Shoulder
+    if ((k1 == 5 && k2 == 6) || (k1 == 6 && k2 == 5))
+        return true;
+    // Hip
+    if ((k1 == 11 && k2 == 12) || (k1 == 12 && k2 == 11))
+        return true;
+    // Knee
+    if ((k1 == 13 && k2 == 14) || (k1 == 14 && k2 == 13))
+        return true;
+    // Ankle
+    if ((k1 == 15 && k2 == 16) || (k1 == 16 && k2 == 15))
+        return true;
+    return false;
+}
+static bool keypoint_in_region(int kp_idx, int region) {
+    switch(region) {
+        case 0: return (kp_idx >= 0 && kp_idx <= 4);          // Head
+        case 1: return (kp_idx == 5 || kp_idx == 6);          // Shoulders
+        case 2: return (kp_idx == 11 || kp_idx == 12);        // Hips
+        case 3: return (kp_idx == 13 || kp_idx == 14);        // Knees
+        case 4: return (kp_idx == 15 || kp_idx == 16);        // Ankles
+        default: return false;
+    }
+}
+
+//to determine if a region pair should be excluded
+static bool is_excluded_region_pair(int a, int b) {
+    // Exclude pairs where both are the same region and that region is SHOULDER, HIP, KNEE, or ANKLE
+    // (i.e., region indices 1, 2, 3, 4)
+    if (a == b && (a == 1 || a == 2 || a == 3 || a == 4))
+        return true;
+    return false;
+}
 
 static void Display_Detection(mpe_pp_outBuffer_t *detect)
 {
@@ -789,8 +819,11 @@ static void compute_region_y(const mpe_pp_outBuffer_t *det, region_acc_t regions
         regions[r].valid = (regions[r].count > 0);
         if (regions[r].valid)
             regions[r].y_avg = regions[r].y_sum / regions[r].count;
+        // Debug: print region info
+       // printf("Region %d: valid=%d, y_avg=%d, count=%d\r\n", r, regions[r].valid, regions[r].y_avg, regions[r].count);
     }
 }
+
 
 static void Display_NetworkOutput(display_info_t *info)
 {
@@ -798,7 +831,7 @@ static void Display_NetworkOutput(display_info_t *info)
   uint32_t nb_rois = info->nb_detect;
   float cpu_load_one_second;
   int line_nb = 0;
-  float nn_fps;
+  //float nn_fps;
   int i;
   thread_com_data_t thread_com_data;
   /* clear previous ui */
@@ -873,7 +906,7 @@ static void Display_NetworkOutput(display_info_t *info)
 	 /* Send to MQTT thread */
 	 tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
   }
-  nn_fps = 1000.0 / info->nn_period_ms;
+  //nn_fps = 1000.0 / info->nn_period_ms;
 
 #if 1
   UTIL_LCDEx_PrintfAt(0, LINE(line_nb),  RIGHT_MODE, "Cpu: %.1f%%",cpu_load_one_second);
@@ -918,30 +951,62 @@ static void Display_NetworkOutput(display_info_t *info)
   UTIL_LCD_FillRGBRect(690, 400, (uint8_t *) logo_g_dc, 78, 53); //draw logo
   /* --- Region-FSM Fall Detection (No Bounding Box Check) --- */
   for (int i = 0; i < info->nb_detect; i++) {
-      // 1) compute region centers
       region_acc_t reg[REGIONS_NB];
       compute_region_y(&info->detects[i], reg);
 
-      // 2) require ≥3 valid regions only
       int valid_cnt = 0;
       for (int r = 0; r < REGIONS_NB; r++) valid_cnt += reg[r].valid;
+      //printf("Detection %d: valid regions = %d\r\n", i, valid_cnt);
 
       bool flat_frame = false;
+      int cause_a = -1, cause_b = -1, cause_diff = 0;
       if (valid_cnt >= 3) {
-          // 3) check if any two region Y-averages are within threshold
+          // For each pair of regions (excluding horizontal region pairs)
           for (int a = 0; a < REGIONS_NB && !flat_frame; a++) {
-              for (int b = a+1; b < REGIONS_NB; b++) {
-                  if (reg[a].valid && reg[b].valid &&
-                      abs(reg[a].y_avg - reg[b].y_avg) <= FLAT_DELTA_PX)
-                  {
-                      flat_frame = true;
-                      break;
+              for (int b = a + 1; b < REGIONS_NB; b++) {
+                  if (reg[a].valid && reg[b].valid && !is_excluded_region_pair(a, b)) {
+                      // For each valid keypoint in region a
+                      for (int ka = 0; ka < AI_POSE_PP_POSE_KEYPOINTS_NB; ka++) {
+                          if (!keypoint_in_region(ka, a)) continue;
+                          const mpe_pp_keyPoints_t *kp_a = &info->detects[i].pKeyPoints[ka];
+                          if (kp_a->conf < KP_CONF_THRESH) continue;
+                          int x_a, y_a;
+                          convert_point(kp_a->x, kp_a->y, &x_a, &y_a);
+
+                          // For each valid keypoint in region b
+                          for (int kb = 0; kb < AI_POSE_PP_POSE_KEYPOINTS_NB; kb++) {
+                              if (!keypoint_in_region(kb, b)) continue;
+                              const mpe_pp_keyPoints_t *kp_b = &info->detects[i].pKeyPoints[kb];
+                              if (kp_b->conf < KP_CONF_THRESH) continue;
+                              int x_b, y_b;
+                              convert_point(kp_b->x, kp_b->y, &x_b, &y_b);
+
+                              // Exclude horizontal keypoint pairs
+                              if (is_horizontal_keypoint_pair(ka, kb))
+                                  continue;
+
+                              int diff = abs(y_a - y_b);
+                              // Optional: debug print
+                              //printf("  Compare keypoints %d (y=%d) and %d (y=%d): diff=%d\r\n", ka, y_a, kb, y_b, diff);
+                              if (diff <= FLAT_DELTA_PX) {
+                                  flat_frame = true;
+                                  cause_a = ka;
+                                  cause_b = kb;
+                                  cause_diff = diff;
+                                  break;
+                              }
+                          }
+                          if (flat_frame) break;
+                      }
                   }
               }
           }
       }
+      if (flat_frame) {
+          printf("  FLAT detected: keypoints %d and %d within %d pixels (diff=%d)\r\n", cause_a, cause_b, FLAT_DELTA_PX, cause_diff);
+      }
 
-      // 4) update FSM counter
+
       fall_fsm_t *fsm = &fall_fsm[i];
       if (flat_frame) {
           if (fsm->flat_counter < WINDOW_FRAMES) fsm->flat_counter++;
@@ -949,23 +1014,34 @@ static void Display_NetworkOutput(display_info_t *info)
           if (fsm->flat_counter > 0) fsm->flat_counter--;
       }
 
-      // 5) commit if stable
       bool fallen_now = (fsm->flat_counter >= WINDOW_FRAMES);
-      if (fallen_now != fsm->flat_now) {
-          fsm->flat_now = fallen_now;
+     // printf("  flat_counter=%d, fallen_now=%d, prev=%d\r\n", fsm->flat_counter, fallen_now, fsm->flat_now);
+      uint32_t now = GetRtcEpoch();
+      if (fallen_now && !fsm->flat_now) {
+          // Fall detected
+          last_fall_time[i] = now;
+          printf("Fall detected (region-only logic)!\n\r");
           thread_com_data.nb_detect = info->nb_detect;
-          if (fallen_now) {
-              printf("Fall detected (region-only logic)!\n\r");
-              thread_com_data.event = 13;
-              fg_state.fallen = FALLEN_FALL;
-          } else {
-              printf("Recovered (region-only logic)\n\r");
-              thread_com_data.event = 1;
-              fg_state.fallen = FALLEN_NORMAL;
-          }
+          thread_com_data.event = 13;
+          fg_state.fallen = FALLEN_FALL;
           tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
+          fsm->flat_now = true;
+      }else if (!fallen_now && fsm->flat_now) {
+    	  // Attempting recovery
+    	  if (now - last_fall_time[i] >= FALL_RECOVERY_LOCKOUT_SEC) {
+    	     printf("Recovered (region-only logic)\n\r");
+    	     thread_com_data.nb_detect = info->nb_detect;
+    	     thread_com_data.event = 1;
+    	     fg_state.fallen = FALLEN_NORMAL;
+    	     tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
+    	     fsm->flat_now = false;
+    	  } else {
+    	     // Still within lockout period, do not allow recovery
+    	     printf("Recovery blocked: %lus remaining\r\n", FALL_RECOVERY_LOCKOUT_SEC - (now - last_fall_time[i]));
+    	  }
       }
   }
+
   /* --- End Region-FSM Block --- */
 
 
