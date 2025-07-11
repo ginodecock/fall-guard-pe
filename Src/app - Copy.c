@@ -155,33 +155,6 @@ volatile system_state_t prev_fg_state = {
     .movement = MOVEMENT_NO_ONE,
     .luminance = LUMINANCE_LIGHT
 };
-
-// Fall-detection parameters (add near top of file)
-#define KP_CONF_THRESH     (0.45f)
-#define REGIONS_NB         5
-#define FLAT_DELTA_PX      30      // vertical tolerance δ
-#define WINDOW_FRAMES      6       // N consecutive frames
-// Remove FLAT_ASPECT_BETA - no longer needed
-
-typedef enum {
-    REGION_HEAD, REGION_SHOULDER, REGION_HIP, REGION_KNEE, REGION_ANKLE
-} body_region_t;
-
-typedef struct {
-    uint32_t y_sum;
-    uint8_t  count;
-    int      y_avg;
-    bool     valid;
-} region_acc_t;
-
-typedef struct {
-    uint8_t flat_counter;
-    bool    flat_now;
-} fall_fsm_t;
-
-// FSM per detection box
-static fall_fsm_t fall_fsm[AI_MPE_YOLOV8_PP_MAX_BOXES_LIMIT];
-
 TX_EVENT_FLAGS_GROUP     SntpFlags;
 
 ULONG mqtt_client_stack[MQTT_CLIENT_STACK_SIZE];
@@ -414,7 +387,6 @@ static int is_cache_enable()
   return 0;
 #endif
 }
-
 // Helper: Parse a single LD2410 frame
 int parse_ld2410_frame(const uint8_t *frame, size_t len, environment_sensor_data_t *out)
 {
@@ -765,32 +737,6 @@ static void Display_Detection(mpe_pp_outBuffer_t *detect)
   for (i = 0; i < AI_POSE_PP_POSE_KEYPOINTS_NB; i++)
     Display_keypoint(&detect->pKeyPoints[i], kp_color[i]);
 }
-static void compute_region_y(const mpe_pp_outBuffer_t *det, region_acc_t regions[REGIONS_NB])
-{
-    memset(regions, 0, sizeof(region_acc_t)*REGIONS_NB);
-    for (int k = 0; k < AI_POSE_PP_POSE_KEYPOINTS_NB; k++) {
-        const mpe_pp_keyPoints_t *kp = &det->pKeyPoints[k];
-        if (kp->conf < KP_CONF_THRESH) continue;
-        int x_px, y_px;
-        convert_point(kp->x, kp->y, &x_px, &y_px);
-
-        body_region_t reg;
-        if      (k <= 4)   reg = REGION_HEAD;
-        else if (k <= 6)   reg = REGION_SHOULDER;
-        else if (k == 11 || k == 12) reg = REGION_HIP;
-        else if (k <= 14)  reg = REGION_KNEE;
-        else if (k <= 16)  reg = REGION_ANKLE;
-        else continue;
-
-        regions[reg].y_sum  += y_px;
-        regions[reg].count ++;
-    }
-    for (int r = 0; r < REGIONS_NB; r++) {
-        regions[r].valid = (regions[r].count > 0);
-        if (regions[r].valid)
-            regions[r].y_avg = regions[r].y_sum / regions[r].count;
-    }
-}
 
 static void Display_NetworkOutput(display_info_t *info)
 {
@@ -916,59 +862,63 @@ static void Display_NetworkOutput(display_info_t *info)
   line_nb += 1;
 #endif
   UTIL_LCD_FillRGBRect(690, 400, (uint8_t *) logo_g_dc, 78, 53); //draw logo
-  /* --- Region-FSM Fall Detection (No Bounding Box Check) --- */
-  for (int i = 0; i < info->nb_detect; i++) {
-      // 1) compute region centers
-      region_acc_t reg[REGIONS_NB];
-      compute_region_y(&info->detects[i], reg);
+  /* Fall detection with 10-frame history */
+      if(initialized_frames >= FRAME_HISTORY) {
+          int hist_idx = (frame_index + FRAME_HISTORY - 10) % FRAME_HISTORY;
 
-      // 2) require ≥3 valid regions only
-      int valid_cnt = 0;
-      for (int r = 0; r < REGIONS_NB; r++) valid_cnt += reg[r].valid;
+          for(int i = 0; i < info->nb_detect; i++) {
+              mpe_pp_keyPoints_t curr_nose = info->detects[i].pKeyPoints[0];
+              mpe_pp_keyPoints_t hist_nose = nose_history[hist_idx][i];
 
-      bool flat_frame = false;
-      if (valid_cnt >= 3) {
-          // 3) check if any two region Y-averages are within threshold
-          for (int a = 0; a < REGIONS_NB && !flat_frame; a++) {
-              for (int b = a+1; b < REGIONS_NB; b++) {
-                  if (reg[a].valid && reg[b].valid &&
-                      abs(reg[a].y_avg - reg[b].y_avg) <= FLAT_DELTA_PX)
-                  {
-                      flat_frame = true;
-                      break;
+              if(curr_nose.conf > AI_MPE_YOLOV8_PP_CONF_THRESHOLD &&
+                 hist_nose.conf > AI_MPE_YOLOV8_PP_CONF_THRESHOLD)
+              {
+                  // Convert coordinates
+                  int x_curr, y_curr, x_hist, y_hist;
+                  convert_point(curr_nose.x, curr_nose.y, &x_curr, &y_curr);
+                  convert_point(hist_nose.x, hist_nose.y, &x_hist, &y_hist);
+
+                  // Calculate motion vector
+                 // float dx = x_curr - x_hist;
+                  float dy = y_curr - y_hist;
+                  //float length = sqrtf(dx*dx + dy*dy);
+
+                  // Display vector length
+                 // int box_x0 = (int)(lcd_bg_area.XSize * (info->detects[i].x_center - info->detects[i].width/2));
+                 // int box_y0 = (int)(lcd_bg_area.YSize * (info->detects[i].y_center - info->detects[i].height/2));
+                 // UTIL_LCDEx_PrintfAt(box_x0, box_y0 - 20, LEFT_MODE, "%.0fpx", length);
+
+                  // Fall detection (vertical movement >10px over 10 frames)
+                  if(dy > 80) {
+                     //UTIL_LCDEx_PrintfAt(0, 200, LEFT_MODE, "Fall detected!");
+               	     printf("Fall detected!\n\r");
+               	     /* Allocate the memory for MQTT client thread   */
+               	     thread_com_data.nb_detect = nb_rois;
+               	     thread_com_data.event = 13; //Fall detected!
+               	     fg_state.fallen = FALLEN_FALL;
+               	     /* Send to MQTT thread */
+               	     if (prev_state_detect != 13){
+               	     	 tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
+               	     	 prev_state_detect = 13;
+               	     }
+                  }
+                  else {
+                    // UTIL_LCDEx_PrintfAt(0, 200, LEFT_MODE, "Normal");
+                	 /* Send to MQTT thread */
+                	 if (fg_state.fallen == FALLEN_FALL){
+                    	 printf("Normal\n\r");
+                    	 /* Allocate the memory for MQTT client thread   */
+                    	 thread_com_data.nb_detect = nb_rois;
+                    	 thread_com_data.event = 1; //Fall detected!
+
+                		 fg_state.fallen = FALLEN_NORMAL;
+                	  	 tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
+                	  	 prev_state_detect = 13;
+                	 }
                   }
               }
           }
       }
-
-      // 4) update FSM counter
-      fall_fsm_t *fsm = &fall_fsm[i];
-      if (flat_frame) {
-          if (fsm->flat_counter < WINDOW_FRAMES) fsm->flat_counter++;
-      } else {
-          if (fsm->flat_counter > 0) fsm->flat_counter--;
-      }
-
-      // 5) commit if stable
-      bool fallen_now = (fsm->flat_counter >= WINDOW_FRAMES);
-      if (fallen_now != fsm->flat_now) {
-          fsm->flat_now = fallen_now;
-          thread_com_data.nb_detect = info->nb_detect;
-          if (fallen_now) {
-              printf("Fall detected (region-only logic)!\n\r");
-              thread_com_data.event = 13;
-              fg_state.fallen = FALLEN_FALL;
-          } else {
-              printf("Recovered (region-only logic)\n\r");
-              thread_com_data.event = 1;
-              fg_state.fallen = FALLEN_NORMAL;
-          }
-          tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
-      }
-  }
-  /* --- End Region-FSM Block --- */
-
-
   /* Draw bounding boxes */
   for (i = 0; i < nb_rois; i++)
     Display_Detection(&rois[i]);
