@@ -31,6 +31,7 @@
 #include "tx_api.h"
 #include "utils.h"
 #include <string.h> // For memcpy
+#include "gdclogo.h"
 #include "nx_user.h"
 #include "tx_api.h"
 #include "nxd_mqtt_client.h"
@@ -402,13 +403,13 @@ int parse_ld2410_frame(const uint8_t *frame, size_t len, environment_sensor_data
     if (len < 8 + 9 + 6) return -4; // ensure enough data
     if (target_data[0] > 3) return -5; //disregard unknown state
     // Parse target state
-    /*switch (target_data[0]) {
-        case 0x00: strcpy(out->target_state, "no_one"); break;
-        case 0x01: strcpy(out->target_state, "moving"); break;
-        case 0x02: strcpy(out->target_state, "static"); break;
-        case 0x03: strcpy(out->target_state, "both"); break;
-        default:   strcpy(out->target_state, "unknown"); break;
-    }*/
+    switch (target_data[0]) {
+        case 0x00: HAL_GPIO_WritePin(GPIOQ, GPIO_PIN_6, GPIO_PIN_RESET); break;  //no_one 0% Brightness  PQ6  LCD_BL_CTRL
+        case 0x01: HAL_GPIO_WritePin(GPIOQ, GPIO_PIN_6, GPIO_PIN_SET); break;  //moving 100% Brightness  PQ6  LCD_BL_CTRL
+        case 0x02: HAL_GPIO_WritePin(GPIOQ, GPIO_PIN_6, GPIO_PIN_SET); break;  //static 100% Brightness  PQ6  LCD_BL_CTRL
+        case 0x03: HAL_GPIO_WritePin(GPIOQ, GPIO_PIN_6, GPIO_PIN_SET); break;    //both 100% Brightness  PQ6  LCD_BL_CTRL
+        default:   HAL_GPIO_WritePin(GPIOQ, GPIO_PIN_6, GPIO_PIN_SET); break; //unknown 100% Brightness  PQ6  LCD_BL_CTRL
+    }
     out->target_state		  = target_data[0];
     out->moving_target_dist   = target_data[1] | (target_data[2] << 8);
     out->moving_target_energy = target_data[3];
@@ -824,16 +825,17 @@ static void Display_NetworkOutput(display_info_t *info)
   UTIL_LCDEx_PrintfAt(0, LINE(line_nb),  RIGHT_MODE, "Cpu: %.1f%%",cpu_load_one_second);
   UTIL_LCDEx_PrintfAt(0, LINE(line_nb), LEFT_MODE, "lux: %.2f", room_sensor_data.lux);
   line_nb += 1;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "   FPS: %.2f",nn_fps);
+  //UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "   FPS: %.2f",nn_fps);
+  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, " Obj: %u", nb_rois);
   UTIL_LCDEx_PrintfAt(0, LINE(line_nb), LEFT_MODE, "Stat: %d", room_sensor_data.target_state);
   line_nb += 1;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, " Obj: %u", nb_rois);
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), LEFT_MODE, "Move: %dcm,%d", room_sensor_data.moving_target_dist,room_sensor_data.moving_target_energy);
-  line_nb += 1;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), LEFT_MODE, "Stat: %dcm,%d", room_sensor_data.static_target_dist, room_sensor_data.static_target_energy);
-  line_nb += 1;
+  //UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, " Obj: %u", nb_rois);
+  //UTIL_LCDEx_PrintfAt(0, LINE(line_nb), LEFT_MODE, "Move: %dcm,%d", room_sensor_data.moving_target_dist,room_sensor_data.moving_target_energy);
+  //line_nb += 1;
+  //UTIL_LCDEx_PrintfAt(0, LINE(line_nb), LEFT_MODE, "Stat: %dcm,%d", room_sensor_data.static_target_dist, room_sensor_data.static_target_energy);
+ // line_nb += 1;
   UTIL_LCDEx_PrintfAt(0, LINE(line_nb), LEFT_MODE, "Dist: %dcm", room_sensor_data.distance);
-  line_nb += 1;
+ // line_nb += 1;
 #else
   (void) nn_fps;
   UTIL_LCDEx_PrintfAt(0, LINE(line_nb),  RIGHT_MODE, "Cpu load");
@@ -859,6 +861,7 @@ static void Display_NetworkOutput(display_info_t *info)
   UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, " Objects %u", nb_rois);
   line_nb += 1;
 #endif
+  UTIL_LCD_FillRGBRect(690, 400, (uint8_t *) logo_g_dc, 78, 53); //draw logo
   /* Fall detection with 10-frame history */
       if(initialized_frames >= FRAME_HISTORY) {
           int hist_idx = (frame_index + FRAME_HISTORY - 10) % FRAME_HISTORY;
@@ -960,6 +963,7 @@ static void nn_thread_fct(ULONG arg)
 
     nn_period[0] = nn_period[1];
     nn_period[1] = HAL_GetTick();
+    uint32_t start_tick = HAL_GetTick();
     nn_period_ms = nn_period[1] - nn_period[0];
 
     capture_buffer = bqueue_get_ready(&nn_input_queue);
@@ -982,7 +986,8 @@ static void nn_thread_fct(ULONG arg)
     /* release buffers */
     bqueue_put_free(&nn_input_queue);
     bqueue_put_ready(&nn_output_queue);
-
+    uint32_t elapsed = HAL_GetTick() - start_tick;
+    if (elapsed < 50) { tx_thread_sleep((50 - elapsed) * TX_TIMER_TICKS_PER_SECOND / 1000); } //inference at 20fps for load reduction
     /* update display stats */
     tx_mutex_get(&disp.lock, TX_WAIT_FOREVER);
     disp.info.inf_ms = inf_ms;
@@ -1309,7 +1314,7 @@ void app_run()
   ret = tx_thread_create(&isp_thread, "isp", isp_thread_fct, 0, isp_tread_stack,
                          sizeof(isp_tread_stack), isp_priority, isp_priority, time_slice, TX_AUTO_START);
   assert(ret == TX_SUCCESS);
-  I2C_ScanBus();
+  //I2C_ScanBus();
 
   if (TSL2561_IsConnected(&hi2c1) == true){
 	  ret = tx_thread_create(&AppTSL2561Thread, "TSL2561", App_TSL2561_Thread_Entry, 0,tsl2561_thread_stack, sizeof(tsl2561_thread_stack), 15, 15, 0, TX_AUTO_START);

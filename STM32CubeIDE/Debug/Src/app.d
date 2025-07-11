@@ -153,7 +153,7 @@ Src/app.o: Y:/VM/stm-workspace/fall-guard-pe/Src/app.c ../../Inc/app.h \
  ../../STM32Cube_FW_N6/Drivers/BSP/Components/Common/lcd.h \
  ../../STM32Cube_FW_N6/Utilities/lcd/stm32_lcd.h \
  ../../STM32Cube_FW_N6/Utilities/lcd/../Fonts/fonts.h \
- ../../Inc/stm32_lcd_ex.h ../../Inc/utils.h \
+ ../../Inc/stm32_lcd_ex.h ../../Inc/utils.h ../../Inc/gdclogo.h \
  Y:/VM/stm-workspace/fall-guard-pe/Src/nx_user.h ../../Inc/app_threadx.h
 ../../Inc/app.h:
 ../../STM32Cube_FW_N6/Middlewares/ST/netxduo/common/inc/nx_api.h:
@@ -315,5 +315,6 @@ Src/app.o: Y:/VM/stm-workspace/fall-guard-pe/Src/app.c ../../Inc/app.h \
 ../../STM32Cube_FW_N6/Utilities/lcd/../Fonts/fonts.h:
 ../../Inc/stm32_lcd_ex.h:
 ../../Inc/utils.h:
+../../Inc/gdclogo.h:
 Y:/VM/stm-workspace/fall-guard-pe/Src/nx_user.h:
 ../../Inc/app_threadx.h:
