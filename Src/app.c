@@ -764,7 +764,7 @@ static bool is_excluded_region_pair(int a, int b) {
     return false;
 }
 
-static void Display_Detection(mpe_pp_outBuffer_t *detect)
+/*static void Display_Detection(mpe_pp_outBuffer_t *detect)
 {
   int xc, yc;
   int x0, y0;
@@ -791,7 +791,39 @@ static void Display_Detection(mpe_pp_outBuffer_t *detect)
     Display_binding(&detect->pKeyPoints[bindings[i][0]], &detect->pKeyPoints[bindings[i][1]], bindings[i][2]);
   for (i = 0; i < AI_POSE_PP_POSE_KEYPOINTS_NB; i++)
     Display_keypoint(&detect->pKeyPoints[i], kp_color[i]);
+}*/
+static void Display_Detection(mpe_pp_outBuffer_t *detect, bool is_fallen)
+{
+    int xc, yc;
+    int x0, y0;
+    int x1, y1;
+    int w, h;
+    int i;
+
+    convert_point(detect->x_center, detect->y_center, &xc, &yc);
+    convert_length(detect->width, detect->height, &w, &h);
+    x0 = xc - (w + 1) / 2;
+    y0 = yc - (h + 1) / 2;
+    x1 = xc + (w + 1) / 2;
+    y1 = yc + (h + 1) / 2;
+    clamp_point(&x0, &y0);
+    clamp_point(&x1, &y1);
+
+    // Use individual fall state instead of global fg_state.fallen
+    if (is_fallen) {
+        UTIL_LCD_DrawRect(x0, y0, x1 - x0, y1 - y0, UTIL_LCD_COLOR_RED);
+        UTIL_LCDEx_PrintfAt(x0, y0, LEFT_MODE, "Fall!");
+    } else {
+        UTIL_LCD_DrawRect(x0, y0, x1 - x0, y1 - y0, UTIL_LCD_COLOR_GREEN);
+        UTIL_LCDEx_PrintfAt(x0, y0, LEFT_MODE, classes_table[detect->class_index]);
+    }
+
+    for (i = 0; i < ARRAY_NB(bindings); i++)
+        Display_binding(&detect->pKeyPoints[bindings[i][0]], &detect->pKeyPoints[bindings[i][1]], bindings[i][2]);
+    for (i = 0; i < AI_POSE_PP_POSE_KEYPOINTS_NB; i++)
+        Display_keypoint(&detect->pKeyPoints[i], kp_color[i]);
 }
+
 static void compute_region_y(const mpe_pp_outBuffer_t *det, region_acc_t regions[REGIONS_NB])
 {
     memset(regions, 0, sizeof(region_acc_t)*REGIONS_NB);
@@ -992,16 +1024,21 @@ static void Display_NetworkOutput(display_info_t *info)
           }
       }
   }
-/*  if (fg_state.fallen == FALLEN_FALL && all_recovered) {
-      thread_com_data.nb_detect = info->nb_detect;
-      thread_com_data.event = 1;
-      fg_state.fallen = FALLEN_NORMAL;
-      printf("recovery unblocked\n\r");
-      tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
-  }*/
   /* Draw bounding boxes */
-  for (i = 0; i < nb_rois; i++)
-    Display_Detection(&rois[i]);
+ // for (i = 0; i < nb_rois; i++)
+ //   Display_Detection(&rois[i]);
+
+  /* Draw bounding boxes with individual fall states */
+  for (i = 0; i < nb_rois; i++) {
+      // Check if this specific person has fallen
+      bool person_fallen = false;
+      if (i < AI_MPE_YOLOV8_PP_MAX_BOXES_LIMIT) {
+          person_fallen = fall_fsm[i].flat_now;
+      }
+      Display_Detection(&rois[i], person_fallen);
+  }
+
+
   // Update history buffer
     for(int i = 0; i < info->nb_detect; i++) {
         nose_history[frame_index][i] = info->detects[i].pKeyPoints[0];
