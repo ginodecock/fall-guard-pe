@@ -28,9 +28,9 @@
 #define MOVEMENT_FREEZE_TIME        30  //Time to determine a Freeze ms
 #define KP_CONF_THRESH     (0.45f)
 #define REGIONS_NB         5
-#define FLAT_DELTA_PX      30      // vertical tolerance δ
-#define WINDOW_FRAMES      6       // N consecutive frames 7 seconds
-#define FALL_RECOVERY_LOCKOUT_SEC 60
+#define FLAT_DELTA_PX      15      // vertical tolerance δ
+#define WINDOW_FRAMES      12       // N consecutive frames 7 seconds
+#define FALL_RECOVERY_LOCKOUT_SEC 7
 
 #define MOSQUITTO_CERT_FILE         "mosquitto.cert.h"
 

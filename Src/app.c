@@ -426,7 +426,7 @@ int parse_ld2410_frame(const uint8_t *frame, size_t len, environment_sensor_data
     if (len < 8 + 9 + 6) return -4; // ensure enough data
     if (target_data[0] > 3) return -5; //disregard unknown state
     // Parse target state
-    switch (target_data[0]) {
+    switch (target_data[0]) { //Automate LCD Backlight
         case 0x00: HAL_GPIO_WritePin(GPIOQ, GPIO_PIN_6, GPIO_PIN_RESET); break;  //no_one 0% Brightness  PQ6  LCD_BL_CTRL
         case 0x01: HAL_GPIO_WritePin(GPIOQ, GPIO_PIN_6, GPIO_PIN_SET); break;  //moving 100% Brightness  PQ6  LCD_BL_CTRL
         case 0x02: HAL_GPIO_WritePin(GPIOQ, GPIO_PIN_6, GPIO_PIN_SET); break;  //static 100% Brightness  PQ6  LCD_BL_CTRL
@@ -787,9 +787,6 @@ static void Display_Detection(mpe_pp_outBuffer_t *detect)
 	  UTIL_LCD_DrawRect(x0, y0, x1 - x0, y1 - y0, UTIL_LCD_COLOR_GREEN);
 	  UTIL_LCDEx_PrintfAt(x0, y0, LEFT_MODE, classes_table[detect->class_index]);
   }
-
-  //UTIL_LCDEx_PrintfAt(x0, y0, LEFT_MODE, classes_table[detect->class_index]);
-
   for (i = 0; i < ARRAY_NB(bindings); i++)
     Display_binding(&detect->pKeyPoints[bindings[i][0]], &detect->pKeyPoints[bindings[i][1]], bindings[i][2]);
   for (i = 0; i < AI_POSE_PP_POSE_KEYPOINTS_NB; i++)
@@ -819,8 +816,6 @@ static void compute_region_y(const mpe_pp_outBuffer_t *det, region_acc_t regions
         regions[r].valid = (regions[r].count > 0);
         if (regions[r].valid)
             regions[r].y_avg = regions[r].y_sum / regions[r].count;
-        // Debug: print region info
-       // printf("Region %d: valid=%d, y_avg=%d, count=%d\r\n", r, regions[r].valid, regions[r].y_avg, regions[r].count);
     }
 }
 
@@ -831,9 +826,10 @@ static void Display_NetworkOutput(display_info_t *info)
   uint32_t nb_rois = info->nb_detect;
   float cpu_load_one_second;
   int line_nb = 0;
-  //float nn_fps;
   int i;
   thread_com_data_t thread_com_data;
+  uint32_t now = GetRtcEpoch();
+  bool all_recovered = true;
   /* clear previous ui */
   UTIL_LCD_FillRect(lcd_fg_area.X0, lcd_fg_area.Y0, lcd_fg_area.XSize, lcd_fg_area.YSize, 0x00000000); /* Clear previous boxes */
 
@@ -848,8 +844,6 @@ static void Display_NetworkOutput(display_info_t *info)
         static_triggered = false;
         //printf(" state 2 , %lu , %lu\n\r",static_start_time, GetRtcEpoch() - static_start_time);
      }else if (!static_triggered && (GetRtcEpoch() - static_start_time >= MOVEMENT_FREEZE_TIME)) {
-        // Static maintained for 20 seconds
-    	//printf(" Static maintained for 20 seconds\n\r");
         thread_com_data.nb_detect = (int)nb_rois;
         thread_com_data.event = 14;  // New event type
         fg_state.movement = MOVEMENT_FREEZE;
@@ -861,26 +855,16 @@ static void Display_NetworkOutput(display_info_t *info)
      }
   }else{
      // Reset if state changes from 2
-	 // printf(" Reset if state changes from 2\n\r");
-	 //printf(" state %lu\n\r",room_sensor_data.target_state);
      static_start_time = 0;
      static_triggered = false;
   }
-  // ... existing room state change detection ...//
-//  if (room_sensor_data.target_state != prev_target_state) {
-     // ... existing room change handling ...
-
-//     printf("Reset state-2 timer on any state change\n\r");
-//     static_start_time = 0;
-//     static_triggered = false;
-//  }
   if (room_sensor_data.target_state == 0){
 	  fg_state.movement = MOVEMENT_NO_ONE;
+	  fg_state.fallen = FALLEN_NORMAL;
   }
   if (room_sensor_data.target_state == 1 || room_sensor_data.target_state == 3){
 	  fg_state.movement = MOVEMENT_MOVE;
   }
-
   //Object data and target state
   if ((GetRtcEpoch() - prev_timestamp) > 3)
     {
@@ -891,7 +875,6 @@ static void Display_NetworkOutput(display_info_t *info)
   	     thread_com_data.nb_detect = (int)prev_nb_person;
   	     thread_com_data.event = 1; //Normal person state
   	     prev_state_detect = 1;
-
   	     /* Send to MQTT thread */
   	     tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
   	  }
@@ -902,52 +885,16 @@ static void Display_NetworkOutput(display_info_t *info)
 	 prev_fg_state.movement = fg_state.movement;
 	 thread_com_data.nb_detect = (int)nb_rois;
 	 thread_com_data.event = 2; //Room change detection
-
 	 /* Send to MQTT thread */
 	 tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
   }
-  //nn_fps = 1000.0 / info->nn_period_ms;
-
-#if 1
   UTIL_LCDEx_PrintfAt(0, LINE(line_nb),  RIGHT_MODE, "Cpu: %.1f%%",cpu_load_one_second);
   UTIL_LCDEx_PrintfAt(0, LINE(line_nb), LEFT_MODE, "lux: %.2f", room_sensor_data.lux);
   line_nb += 1;
-  //UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "   FPS: %.2f",nn_fps);
   UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, " Obj: %u", nb_rois);
   UTIL_LCDEx_PrintfAt(0, LINE(line_nb), LEFT_MODE, "Stat: %d", room_sensor_data.target_state);
   line_nb += 1;
-  //UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, " Obj: %u", nb_rois);
-  //UTIL_LCDEx_PrintfAt(0, LINE(line_nb), LEFT_MODE, "Move: %dcm,%d", room_sensor_data.moving_target_dist,room_sensor_data.moving_target_energy);
-  //line_nb += 1;
-  //UTIL_LCDEx_PrintfAt(0, LINE(line_nb), LEFT_MODE, "Stat: %dcm,%d", room_sensor_data.static_target_dist, room_sensor_data.static_target_energy);
- // line_nb += 1;
   UTIL_LCDEx_PrintfAt(0, LINE(line_nb), LEFT_MODE, "Dist: %dcm", room_sensor_data.distance);
- // line_nb += 1;
-#else
-  (void) nn_fps;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb),  RIGHT_MODE, "Cpu load");
-  line_nb += 1;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb),  RIGHT_MODE, "   %.1f%%", cpu_load_one_second);
-  line_nb += 1;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "nn period");
-  line_nb += 1;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "   %ums", info->nn_period_ms);
-  line_nb += 1;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "Inference");
-  line_nb += 1;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "   %ums", info->inf_ms);
-  line_nb += 1;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "Post process");
-  line_nb += 1;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "   %ums", info->pp_ms);
-  line_nb += 1;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "Display");
-  line_nb += 1;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, "   %ums", info->disp_ms);
-  line_nb += 1;
-  UTIL_LCDEx_PrintfAt(0, LINE(line_nb), RIGHT_MODE, " Objects %u", nb_rois);
-  line_nb += 1;
-#endif
   UTIL_LCD_FillRGBRect(690, 400, (uint8_t *) logo_g_dc, 78, 53); //draw logo
   /* --- Region-FSM Fall Detection (No Bounding Box Check) --- */
   for (int i = 0; i < info->nb_detect; i++) {
@@ -986,7 +933,6 @@ static void Display_NetworkOutput(display_info_t *info)
                                   continue;
 
                               int diff = abs(y_a - y_b);
-                              // Optional: debug print
                               //printf("  Compare keypoints %d (y=%d) and %d (y=%d): diff=%d\r\n", ka, y_a, kb, y_b, diff);
                               if (diff <= FLAT_DELTA_PX) {
                                   flat_frame = true;
@@ -1006,17 +952,14 @@ static void Display_NetworkOutput(display_info_t *info)
           printf("  FLAT detected: keypoints %d and %d within %d pixels (diff=%d)\r\n", cause_a, cause_b, FLAT_DELTA_PX, cause_diff);
       }
 
-
       fall_fsm_t *fsm = &fall_fsm[i];
       if (flat_frame) {
           if (fsm->flat_counter < WINDOW_FRAMES) fsm->flat_counter++;
       } else {
           if (fsm->flat_counter > 0) fsm->flat_counter--;
       }
-
       bool fallen_now = (fsm->flat_counter >= WINDOW_FRAMES);
      // printf("  flat_counter=%d, fallen_now=%d, prev=%d\r\n", fsm->flat_counter, fallen_now, fsm->flat_now);
-      uint32_t now = GetRtcEpoch();
       if (fallen_now && !fsm->flat_now) {
           // Fall detected
           last_fall_time[i] = now;
@@ -1041,20 +984,30 @@ static void Display_NetworkOutput(display_info_t *info)
     	  }
       }
   }
-
-  /* --- End Region-FSM Block --- */
-
-
+  for (int i = 0; i < AI_MPE_YOLOV8_PP_MAX_BOXES_LIMIT; i++) {
+      if (last_fall_time[i] != 0) { // Only check for persons who have fallen
+          if ((now - last_fall_time[i]) < FALL_RECOVERY_LOCKOUT_SEC) {
+              all_recovered = false;
+              break;
+          }
+      }
+  }
+/*  if (fg_state.fallen == FALLEN_FALL && all_recovered) {
+      thread_com_data.nb_detect = info->nb_detect;
+      thread_com_data.event = 1;
+      fg_state.fallen = FALLEN_NORMAL;
+      printf("recovery unblocked\n\r");
+      tx_queue_send(&measurement_queue, &thread_com_data, TX_NO_WAIT);
+  }*/
   /* Draw bounding boxes */
   for (i = 0; i < nb_rois; i++)
     Display_Detection(&rois[i]);
-
   // Update history buffer
-      for(int i = 0; i < info->nb_detect; i++) {
-          nose_history[frame_index][i] = info->detects[i].pKeyPoints[0];
-      }
-      frame_index = (frame_index + 1) % FRAME_HISTORY;
-      if(initialized_frames < FRAME_HISTORY) initialized_frames++;
+    for(int i = 0; i < info->nb_detect; i++) {
+        nose_history[frame_index][i] = info->detects[i].pKeyPoints[0];
+    }
+    frame_index = (frame_index + 1) % FRAME_HISTORY;
+    if(initialized_frames < FRAME_HISTORY) initialized_frames++;
 }
 
 static void nn_thread_fct(ULONG arg)
@@ -1069,13 +1022,11 @@ static void nn_thread_fct(ULONG arg)
   uint32_t inf_ms;
   uint32_t ts;
   int ret;
-
   /* setup buffers size */
   nn_in_len = LL_Buffer_len(&nn_in_info[0]);
   nn_out_len = LL_Buffer_len(&nn_out_info[0]);
   //printf("nn_out_len = %d\n", nn_out_len);
   assert(nn_out_len == NN_BUFFER_OUT_SIZE);
-
   /*** App Loop ***************************************************************/
   nn_period[1] = HAL_GetTick();
 
@@ -1663,10 +1614,8 @@ static VOID ip_address_change_notify_callback(NX_IP *ip_instance, VOID *ptr)
 static VOID nx_app_thread_entry (ULONG thread_input)
 {
   UINT ret = NX_SUCCESS;
-
   /* Create a DNS client */
   ret = dns_create(&DnsClient);
-
   if (ret != NX_SUCCESS)
   {
     Error_Handler();
@@ -1679,37 +1628,25 @@ static VOID nx_app_thread_entry (ULONG thread_input)
     Error_Handler();
     /* USER CODE END IP address change callback error */
   }
-
   /* set DHCP notification callback  */
-   /*start the DHCP client */
+  /*start the DHCP client */
   ret = nx_dhcp_start(&DHCPClient);
   if (ret != NX_SUCCESS)
   {
-
     Error_Handler();
-
   }
-
   printf("Looking for DHCP server ..\n\r");
   if(tx_semaphore_get(&DHCPSemaphore, TX_WAIT_FOREVER) != TX_SUCCESS)
   {
 	  printf("Looking for DHCP server ..error\n\r");
     Error_Handler();
   }
-
-  /* USER CODE BEGIN Nx_App_Thread_Entry 2 */
   PRINT_IP_ADDRESS(IpAddress);
-
   /* start the SNTP client thread */
   tx_thread_resume(&AppSNTPThread);
-
   /* this thread is not needed any more, we relinquish it */
   tx_thread_relinquish();
-  /* USER CODE END Nx_App_Thread_Entry 2 */
-
 }
-/* USER CODE BEGIN 1 */
-
 /**
 * @brief  DNS Create Function.
 * @param dns_ptr
@@ -1718,7 +1655,6 @@ static VOID nx_app_thread_entry (ULONG thread_input)
 UINT dns_create(NX_DNS *dns_ptr)
 {
   UINT ret = NX_SUCCESS;
-
   /* Create a DNS instance for the Client */
   ret = nx_dns_create(dns_ptr, &NetXDuoEthIpInstance, (UCHAR *)"DNS Client");
   if (ret != NX_SUCCESS)
@@ -1731,7 +1667,6 @@ UINT dns_create(NX_DNS *dns_ptr)
   {
     Error_Handler();
   }
-
   return ret;
 }
 
@@ -1975,7 +1910,6 @@ static VOID App_MQTT_Client_Thread_Entry(ULONG thread_input)
   {
     Error_Handler();
   }
-  //ret = nxd_mqtt_client_secure_connect(&MqttClient, &DefaultNXDAddress, MQTT_PORT, tls_setup_callback,MQTT_KEEP_ALIVE_TIMER, CLEAN_SESSION, NX_WAIT_FOREVER);
   ret = nxd_mqtt_client_connect(&MqttClient, &mqtt_server_ip, 1883,MQTT_KEEP_ALIVE_TIMER, CLEAN_SESSION, NX_WAIT_FOREVER);
   if (ret != NX_SUCCESS)
   {
@@ -2002,11 +1936,7 @@ static VOID App_MQTT_Client_Thread_Entry(ULONG thread_input)
       case MOVEMENT_MOVE: movement_str = "move"; break;
       default: movement_str = "no_one"; break;
   }
-
-//  snprintf(message, sizeof(message),"{\"ts\":%lu,""\"mac\":\"%02X%02X%02X%02X%02X%02X\",""\"status\":\"start\"}",GetRtcEpoch(), MACAddr[0], MACAddr[1], MACAddr[2],MACAddr[3],MACAddr[4],MACAddr[5]);
- // snprintf(message, sizeof(message),"{\"ts\":%lu,\"mac\":\"%02X%02X%02X%02X%02X%02X\",\"nb_detect\":%i,\"event\":%i,\"lux\":%.2f,\"target_state\":%i}",GetRtcEpoch(),MACAddr[0], MACAddr[1], MACAddr[2],MACAddr[3], MACAddr[4], MACAddr[5],thread_com_data.nb_detect,thread_com_data.event,room_sensor_data.lux,room_sensor_data.target_state);
   snprintf(message, sizeof(message),"{\"ts\":%lu,\"mac\":\"%02X%02X%02X%02X%02X%02X\",\"nb_detect\":%i,\"event\":%i,\"lux\":%.2f,\"sfal\":\"%s\",\"smov\":\"%s\",\"slum\":\"%s\"}",GetRtcEpoch(),MACAddr[0], MACAddr[1], MACAddr[2],MACAddr[3], MACAddr[4], MACAddr[5],thread_com_data.nb_detect,thread_com_data.event,room_sensor_data.lux,fallen_str, movement_str, luminance_str);
-
   len = 0;
   while (message[len] != '\0') {
       len++;
@@ -2037,7 +1967,6 @@ static VOID App_MQTT_Client_Thread_Entry(ULONG thread_input)
 	}
 
 	/* Format JSON message */
-	//snprintf(message, sizeof(message),"{\"ts\":%lu,\"mac\":\"%02X%02X%02X%02X%02X%02X\",\"nb_detect\":%i,\"event\":%i,\"lux\":%.2f,\"target_state\":%i}",GetRtcEpoch(),MACAddr[0], MACAddr[1], MACAddr[2],MACAddr[3], MACAddr[4], MACAddr[5],thread_com_data.nb_detect,thread_com_data.event,room_sensor_data.lux,room_sensor_data.target_state);
 	snprintf(message, sizeof(message),"{\"ts\":%lu,\"mac\":\"%02X%02X%02X%02X%02X%02X\",\"nb_detect\":%i,\"event\":%i,\"lux\":%.2f,\"sfal\":\"%s\",\"smov\":\"%s\",\"slum\":\"%s\"}",GetRtcEpoch(),MACAddr[0], MACAddr[1], MACAddr[2],MACAddr[3], MACAddr[4], MACAddr[5],thread_com_data.nb_detect,thread_com_data.event,room_sensor_data.lux,fallen_str, movement_str, luminance_str);
     /* Publish data */
 	len = 0;
@@ -2073,12 +2002,6 @@ static VOID App_MQTT_Client_Thread_Entry(ULONG thread_input)
     }
 }
 /**
-* @brief  MQTT Client thread log objects.
-* @param thread_input: ULONG user argument used by the thread entry
-* @retval none
-*/
-
-/**
 * @brief  Link thread entry
 * @param thread_input: ULONG thread parameter
 * @retval none
@@ -2091,15 +2014,12 @@ static VOID App_Link_Thread_Entry(ULONG thread_input)
   while(1)
   {
     /* Send request to check if the Ethernet cable is connected. */
-    status = nx_ip_interface_status_check(&NetXDuoEthIpInstance, 0, NX_IP_LINK_ENABLED,
-                                      &actual_status, 10);
-
+    status = nx_ip_interface_status_check(&NetXDuoEthIpInstance, 0, NX_IP_LINK_ENABLED,&actual_status, 10);
     if(status == NX_SUCCESS)
     {
       if(linkdown == 1)
       {
         linkdown = 0;
-
         /* The network cable is connected. */
         printf("The network cable is connected.\n\r");
 
@@ -2193,4 +2113,3 @@ static uint32_t GetRtcEpoch() {
 
     return (uint32_t)mktime(&tm_time);
 }
-
